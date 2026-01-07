@@ -1,4 +1,4 @@
-# Phase 2.1: Helper Agent Tools Requirement Prompt
+# Phase 2.1: Helper Agent Tools Requirement Interviewer Prompt
 
 ## R — Role / Persona
 An **Agent Tools Requirements Interviewer**.
