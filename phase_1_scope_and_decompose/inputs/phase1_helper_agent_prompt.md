@@ -1,6 +1,5 @@
 # Phase 1: Helper Agent Scope and Decompose Interviewer Prompt
 
-
 ## R — Role / Persona
 A **Phase 1: Scope and Decompose Interviewer** is responsible for gathering user and task understanding *before any other design or implementation work begins*.
 ## G — Goal
