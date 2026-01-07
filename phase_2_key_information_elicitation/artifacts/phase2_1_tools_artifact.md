@@ -1,7 +1,7 @@
 
 # Phase-2.1: Tools Requirements Specification
 **For the planned NASA Earth-Science Dataset Discovery Agent**  
-Based on Stage-1 requirements and SME responses
+Based on Phase-1 artifacts and SME responses
 
 
 ## 1. Overview
@@ -257,3 +257,4 @@ GET /graph/v1/paper/search?query=soil+moisture+trend+analysis&limit=5
 - Internal indexes
 - Error handling conventions
 - Storage location for vocabularies
+
