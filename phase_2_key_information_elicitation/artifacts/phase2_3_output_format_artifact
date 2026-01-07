@@ -3,7 +3,6 @@
 
 ## OUTPUT FORMATTING & INTERACTION CONSTRAINTS
 
-
 ## A. Global Behavioral Rules
 ### No Recommendations or Selections
 - The agent **must not recommend, select, or endorse datasets**.
@@ -131,4 +130,5 @@ Must include:
 
 **Mandatory phrase (verbatim):**
 > “Here’s what I cannot determine and what I need from you.”
+
 
