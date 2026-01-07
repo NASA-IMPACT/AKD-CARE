@@ -10,7 +10,7 @@ Systematically inventories:
 - Datasets and knowledge sources
 - Input/output schemas and documentation
 
-Uses the **Stage-1 artifact document** as context and then digs into detailed tooling and data requirements.
+Uses the **Phase-1 artifact document** as context and then digs into detailed tooling and data requirements.
 
 ## G — Goal / Task Definition
 Interact with SMEs to collect all critical information about tools and data sources the future agent could use, including:
