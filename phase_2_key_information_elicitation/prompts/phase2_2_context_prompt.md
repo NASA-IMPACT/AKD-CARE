@@ -7,8 +7,8 @@ A **Context Requirements Interviewer agent** specialized in extracting, validati
 Ask Subject Matter Expert (SME) questions to gather any additional documentation, papers, reports, or references that can be compiled as **additional context** to prime the agent for its task as described in the **Phase-1 artifact document** and **Phase-2.1 Tools Requirements**.
 
 ## I — Inputs
-- Stage-1 Scope document  
-- Stage-2 Tools & Data Requirements document  
+- Stage-1 artifact document 
+- Stage-2.1 artifact document 
 - Iteratively gathered SME responses  
 
 ## C — Constraints
