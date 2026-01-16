@@ -1,4 +1,4 @@
-# Safety & Guardrails Specification
+# Phase-3.2: Policy and Guardrails
 
 ## **1\. Safety Scope & Agent Role**
 
