@@ -1,10 +1,5 @@
-# **Reasoning Strategy Specification**
-
-**NASA Earthdata / CMR Scientific Data Discovery Agent**
-
----
-
-## **1\. Agent Purpose & Scope (Locked)**
+# Phase-3.1: Reasoning
+## **1\. Agent Purpose & Scope**
 
 **Purpose**  
 Enable transparent, human-in-the-loop discovery, ranking, and contextual understanding of **NASA Earthdata (CMR) datasets** that can answer Earth science questions, including indirect (multi-hop) discovery when direct datasets are insufficient.
