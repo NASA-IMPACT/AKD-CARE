@@ -17,7 +17,20 @@ Your goal is to produce a validated Safety & Guardrails Specification that clear
 
 You have access to artifacts from Phase-1, Phase 2.1, Phase 2.3 and Phase 3.1.
 
-Read it first, treat all inputs as authoritative but potentially incomplete from a safety perspective.
+You also have access to the following guardrail reference artifact:
+
+- `guardrails_risk_taxonomy_reference.md`
+
+This artifact describes:
+- the YAML risk taxonomy (risk id, description, concern)
+- the RiskAgent guardrail that evaluates generated content against selected risk IDs
+- the GraniteGuardianTool guardrail that evaluates user inputs across harm and jailbreak categories
+- the guardrail execution model used by the system.
+
+Read all artifacts first and treat them as authoritative but potentially incomplete from a safety perspective.
+
+Your task is to ensure that guardrails derived from these artifacts are explicitly validated with SMEs.
+
 
 ## C — Constraints
 
@@ -47,7 +60,87 @@ Produce a structured document with the following sections:
 * Open Questions & Residual Risks
 * Referenced Norms & Standards (Informative, Not Binding)
 
+* Guardrail Provider Configuration
+  * GraniteGuardianTool
+    * Enabled harm categories
+    * Disabled categories
+    * Enforcement actions when triggered
+  * RiskAgent
+    * Active risk IDs from taxonomy
+    * Risk descriptions and concerns
+    * Enforcement actions when detected
+
+* Guardrail Enforcement Matrix
+
+
+  Provide a structured matrix mapping guardrail signals to enforcement actions.
+
+  The matrix must include entries for:
+
+  - Granite Guardian categories selected for INPUT guardrails
+  - Risk IDs selected from the taxonomy for OUTPUT guardrails
+
+  Required columns:
+
+  | guardrail_provider | signal_type | signal | scope | default_action | escalation_trigger | logging_level | notes |
+
+  Where:
+
+  - guardrail_provider
+    - GraniteGuardianTool
+    - RiskAgent
+
+  - signal_type
+    - category
+    - risk_id
+
+  - signal
+    - Granite category name OR taxonomy risk ID selected from the artifact
+
+  - scope
+    - INPUT
+    - OUTPUT
+
+  - default_action
+    - ALLOW
+    - WARN
+    - CLARIFY
+    - REWRITE
+    - REFUSE
+    - ESCALATE
+
+  - rewrite_policy
+    - NONE
+    - REGENERATE_ONCE
+    - REGENERATE_WITH_CONSTRAINTS
+    - REGENERATE_MAX_N (specify N)
+
+  - escalation_trigger
+    - NONE
+    - REWRITE_FAILED
+    - HIGH_CONFIDENCE_RISK
+    - MULTIPLE_RISKS
+
+  - logging_level
+    - NONE
+    - INFO
+    - WARN
+    - HIGH
+
+
+  Populate the matrix using:
+
+    - Granite Guardian categories approved by SMEs
+    - Risk IDs selected from the taxonomy in `guardrails_risk_taxonomy_reference.md`
+
+  Only SME-approved signals should appear in the final matrix.
+
+
+
+
 Use clear headings, bullet points, and traceability to prior stages.
+
+
 
 ## S — Steps for the Model
 
@@ -84,6 +177,47 @@ Use clear headings, bullet points, and traceability to prior stages.
 
      * (alignment with institutional values and research integrity)
 
+    * Guardrail Providers & Automated Risk Detection
+
+      The system may use automated guardrail providers described in the guardrails artifact.
+
+      These may include:
+
+      - GraniteGuardianTool (input safety screening)
+      - RiskAgent (taxonomy-based risk detection on generated content)
+
+      For this dimension:
+
+      - Ask SMEs which Granite Guardian harm categories should be enabled or disabled for input safety screening.
+      - Identify candidate risk IDs from the taxonomy described in `guardrails_risk_taxonomy_reference.md`.
+      - Ask SMEs which of these taxonomy risks should be actively monitored in generated responses.
+      - Confirm enforcement behavior for each selected signal.
+
+      Important constraints:
+
+      - Do not invent new risk IDs.
+      - Only risk IDs present in the taxonomy artifact may be considered.
+      - Only risks explicitly approved by SMEs should appear in the final Guardrail Enforcement Matrix.
+
+      Probe specifically for:
+
+      - whether detection should block the response
+      - whether the agent should rewrite or clarify the response
+      - whether the system should log or escalate the event
+      - whether users should see refusal or explanation messages
+
+      Highlight the current guardrail execution order if present in the artifact:
+
+      - Input guardrail: GraniteGuardianTool → RiskAgent
+      - Output guardrail: RiskAgent
+
+      If enforcement behavior is unclear, propose options labeled:
+      "Suggested (Not Yet Approved)".
+
+      Ensure that all SME-approved signals are later captured in the Guardrail Enforcement Matrix section of the artifact.
+
+
+
 3. **Introduce Standards-Informed Suggestions**
    * Where helpful, propose guardrails informed by:
      * NASA NPRs / internal governance (if applicable)
@@ -99,3 +233,4 @@ Use clear headings, bullet points, and traceability to prior stages.
 5. **Produce the Safety & Guardrails Artifact**
 
    * Deliver the structured output format with traceability to prior stages.
+
