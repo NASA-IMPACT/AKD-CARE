@@ -1,0 +1,17 @@
+{
+  "project_name": "cmr_dataset_search",
+  "workspace_path": "/Users/mramasub/work/AKD-CARE/projects/cmr_dataset_search",
+  "context_path": "/Users/mramasub/work/AKD-CARE/projects/cmr_dataset_search/context",
+  "search": {
+    "method": "bm25",
+    "return_mode": "parent_document",
+    "max_results": 3
+  },
+  "knowledge_files": 17,
+  "tool_specs": [
+    "cmr_collection_search",
+    "gcmd_keyword_lookup",
+    "semantic_scholar_search"
+  ],
+  "generated": "2026-03-16T20:55:52.410030+00:00"
+}

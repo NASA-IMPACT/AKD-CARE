@@ -1,0 +1,28 @@
+{
+  "_note": "GCMD controlled vocabulary — local cache. Populate before deployment. Structure below shows expected schema.",
+  "sciencekeywords": [
+    {
+      "Category": "",
+      "Topic": "",
+      "Term": "",
+      "Variable_Level_1": "",
+      "Variable_Level_2": "",
+      "Variable_Level_3": "",
+      "Detailed_Variable": ""
+    }
+  ],
+  "instruments": [
+    {
+      "Short_Name": "",
+      "Long_Name": "",
+      "URI": ""
+    }
+  ],
+  "platforms": [
+    {
+      "Short_Name": "",
+      "Long_Name": "",
+      "URI": ""
+    }
+  ]
+}
