@@ -99,3 +99,45 @@ Use clear headings, bullet points, and traceability to prior stages.
 5. **Produce the Safety & Guardrails Artifact**
 
    * Deliver the structured output format with traceability to prior stages.
+
+---
+
+## Dynamic CARE Augmentation
+
+> When the `care-workspace-builder` MCP server is connected, perform these additional steps during the guardrails interview above. Hard constraints identified by the SME become persistent rules in the agent's system prompt. If no MCP server is connected, skip this section entirely.
+
+### Capturing Hard Constraints as Persistent Rules
+
+When the SME identifies a **Non-Negotiable "Never Do" rule** or an **Approved Guardrail** that must ALWAYS be enforced:
+
+```
+index_add_rule(
+    project_name,
+    rule="<the constraint>",
+    rationale="<why it must always be enforced>"
+)
+```
+
+These rules become part of the "General rules (always active)" section in the root `context/_index.md`. They are embedded directly in the deployed agent's system prompt — they are NOT retrieved on demand.
+
+### What qualifies as a persistent rule
+
+- Rules the SME says must **always** be followed, no matter what
+- Non-negotiable safety boundaries
+- Compliance or policy requirements
+- Hard constraints on agent behavior (e.g., "never present results without citations")
+
+### What does NOT go here
+
+- Domain knowledge (goes in knowledge files via Phase 2.2 augmentation)
+- Conditional behaviors (go in tool response patterns via Phase 2.1 augmentation)
+- Preferences or soft guidelines (stay in the guardrails artifact)
+
+### At the end
+
+After the guardrails interview is complete, review the persistent rules:
+```
+workspace_read(project_name, "context/_index.md")
+```
+
+Confirm with the SME: "These rules will ALWAYS be active in the agent's system prompt. Are they correct and complete?"

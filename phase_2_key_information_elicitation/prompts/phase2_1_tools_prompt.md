@@ -80,3 +80,59 @@ Within each section, use **structured bullets or tables** for each tool or datas
 6. At the end:
    - Produce the structured **Tools Requirements** document
    - Include all open questions and TBD items for follow-up
+
+---
+
+## Dynamic CARE Augmentation
+
+> When the `care-workspace-builder` MCP server is connected, perform these additional steps during the tools elicitation above. Each tool the SME describes becomes a structured tool specification in the workspace. If no MCP server is connected, skip this section entirely.
+
+### For each tool or API the SME identifies
+
+**Part A: "Show me how you use it"**
+
+1. `tool_spec_init(project_name, tool_name=<name>, purpose=<one-line purpose>)`
+2. Ask: "Walk me through a typical use of this tool — what do you type or click?"
+3. `tool_spec_write(project_name, tool_name, "description", content=<from SME's walkthrough>)`
+4. Ask: "What inputs does it need? What's required vs optional?"
+5. `tool_spec_write(project_name, tool_name, "parameters", content=<parameter table>)`
+
+**Part B: "Show me what goes wrong"**
+
+Ask: "What errors or problems do you run into with this tool?"
+
+For each failure scenario:
+```
+tool_spec_add_response(
+    project_name, tool_name,
+    scenario="<name>",
+    when="<condition>",
+    agent_hint="<what the agent should know for reasoning>",
+    user_message="<what the user should see>",
+    next_action="<what typically happens next>"
+)
+```
+
+Keep asking "what do you try next?" until SME says "I'd try a different approach" — this defines the error chain boundary.
+
+**Part C: "What about the user?"**
+
+Ask: "When this tool succeeds, what should the user see?"
+
+Create response patterns for success scenarios using `tool_spec_add_response`. Capture the dual-audience separation:
+- `agent_hint` = what the agent needs to know for its next reasoning step (not shown to user)
+- `user_message` = what the human user should see
+- `next_action` = what typically happens after this
+
+**Part D: "When should it refuse?"**
+
+Ask: "Are there situations where this tool should NOT be used, or where the agent should refuse?"
+
+Create response patterns for guardrail scenarios (safety checks, authentication requirements, scope boundaries).
+
+### DON'Ts for this augmentation
+
+- Don't ask about implementation details (JSON schemas, endpoint URLs)
+- Don't duplicate domain knowledge from Phase 2.2 — reference it
+- Don't create a tool spec for `get_context` (that's infrastructure, not a domain tool)
+- Don't discuss MCP or JSON-RPC with the SME

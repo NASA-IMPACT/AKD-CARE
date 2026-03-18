@@ -83,4 +83,54 @@ Generate a **Reasoning Strategy Specification**.
 9. **Final Synthesis:**
    * Generate the **Reasoning Strategy Specification** using the output format above
    * Mark unclear items as **TBD**
-   * Ask: *“Which parts of this reasoning strategy are incomplete, incorrect, or need refinement?”*
+   * Ask: *”Which parts of this reasoning strategy are incomplete, incorrect, or need refinement?”*
+
+---
+
+## Dynamic CARE Augmentation
+
+> When the `care-workspace-builder` MCP server is connected, perform these additional steps during the reasoning strategy interview above. The reasoning strategy captured here feeds directly into the assembled system prompt in Phase 4. If no MCP server is connected, skip this section entirely.
+
+### Connecting reasoning to the knowledge workspace
+
+During each reasoning section, cross-reference with the knowledge workspace built in Phase 2.2:
+
+1. **Retrieval strategy (Step 4 above)**: When the SME describes how the agent should retrieve information, check the workspace trigger table:
+   ```
+   workspace_read(project_name, “context/_index.md”)
+   ```
+   Ask: “Here are the knowledge triggers we've defined. Does the retrieval strategy cover all of these? Are there triggers that should change how the agent reasons?”
+
+2. **Tool selection (Step 5 above)**: Cross-reference with tool specs from Phase 2.1:
+   ```
+   workspace_list(project_name, “tools”)
+   ```
+   Ask: “Here are the tools we've specified. Does the reasoning strategy account for choosing between them? What about fallback chains?”
+
+3. **Uncertainty handling (Step 6 above)**: Identify which knowledge files the agent should consult when uncertain:
+   - Terminology files help resolve ambiguous queries
+   - Heuristic files provide rules of thumb when data is incomplete
+   - Common mistake files warn about likely errors
+
+### Capturing reasoning patterns as workspace knowledge
+
+If the SME describes reasoning patterns that are domain-specific (not just general strategy), capture them as heuristic knowledge files:
+
+```
+workspace_write(
+    project_name,
+    path=”context/heuristics/{reasoning_pattern}.md”,
+    content=<structured heuristic>,
+    trigger_terms=[<situations that invoke this reasoning>],
+    trigger_description=”<when the agent should use this reasoning pattern>”
+)
+```
+
+Only do this for **domain-specific** reasoning. General strategy (e.g., “think step by step”) stays in the Reasoning Strategy Specification and feeds into Phase 4 assembly.
+
+### At the end
+
+Save the reasoning strategy to the workspace for Phase 4:
+```
+workspace_write(project_name, path=”reasoning_strategy.md”, content=<the final Reasoning Strategy Specification>)
+```

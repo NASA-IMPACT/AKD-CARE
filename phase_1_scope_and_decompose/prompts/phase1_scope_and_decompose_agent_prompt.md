@@ -50,3 +50,33 @@ Collect **complete Phase 1 requirements** by conducting a structured requirement
    - Produce a bullet-point list of all Stage-1 requirements
    - Provide a concise summary
    - Ask the user to confirm or correct the captured requirements
+
+---
+
+## Dynamic CARE Augmentation
+
+> When the `care-workspace-builder` MCP server is connected, perform these additional steps after the core interview above. If no MCP server is connected, skip this section entirely.
+
+### After SME confirms the scope summary
+
+**A. Knowledge volume assessment** — Ask one additional question:
+
+> "How much specialized knowledge does someone need to do this job? Could you write it all on one page, or would it fill a handbook?"
+
+This determines how much workspace structure we'll need in Phase 2.
+
+**B. Initialize workspace** — Call the workspace builder tools:
+
+1. `workspace_init(project_name=<derive from agent purpose>, domain_description=<one-line summary>)`
+2. `workspace_write(project_name, path="scope.md", content=<the confirmed scope summary>)`
+
+**C. Transition** — Tell the SME:
+
+> "Great — I've captured the scope. Next, I'm going to ask you to teach me the specialized knowledge someone would need to do this job well."
+
+### DON'Ts for this augmentation
+
+- Don't ask about tools/APIs (that's Phase 2.1)
+- Don't capture domain knowledge yet (that's Phase 2.2)
+- Don't use jargon with the SME (MCP, RAG, system prompt, triggers)
+- Don't rush through the scoping questions to get to workspace creation
