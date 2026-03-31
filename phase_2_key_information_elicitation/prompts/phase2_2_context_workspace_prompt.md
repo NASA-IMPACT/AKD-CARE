@@ -124,4 +124,3 @@ This phase answers:
 This phase does **not** answer:
 
 * **How should the agent decide, sequence, retry, or escalate once triggered?**
-If you want, next I can rewrite **Phase 3.2 Policy & Guardrails** in the same CARE V2 format so the whole set is consistent.
