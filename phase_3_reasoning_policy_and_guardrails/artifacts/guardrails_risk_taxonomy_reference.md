@@ -18,9 +18,36 @@ Each risk entry contains:
 
 Example structure:
 
-risk/<id>:
+```yaml
+risks:
+- id: ...
   description: ...
   concern: ...
+```
+
+## Risk IDs:
+
+- compliance
+- privacy
+- maliciousness
+- profanity
+- toxicity
+- out-of-distribution-checks
+- jailbreak-prevention
+- fairness
+- consistency
+- uncertainty-identification
+- verification
+- ip-and-copyright
+- societal-impact
+- hallucination-identification
+- attribution
+- static-knowledge
+- outdated-confidence
+- overgeneralization
+- multidisciplinary-failure
+- lack-of-adaptive-reasoning
+- positivity-bias
 
 ## RiskAgent Behavior
 RiskAgent evaluates generated content using a selected list of risk IDs.
