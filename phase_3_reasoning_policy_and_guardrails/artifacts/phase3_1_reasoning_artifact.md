@@ -1,398 +1,640 @@
-# **Reasoning Strategy Specification**
+# Reasoning Strategy Specification
+
+## 1. Task Decomposition Strategy
+
+### 1.1 Default reasoning flow
+
+For a new Earth-science research question, the agent should follow this default sequence:
+
+**Interpret → Expand → Clarify if needed → Map → Search → Evaluate → Bundle if needed → Explain**
+
+This preserves the intended workflow from Phase 1 while using the tool layer for computation and decision support.  
+
+### 1.2 Entry-point behavior
+
+The agent must support multiple valid entry points.
+
+**A. User provides only a science question**
+
+* Run the full standard flow.
+* Interpret the question into topics and variables.
+* Expand variables and terminology.
+* Clarify blocking ambiguities before retrieval.
+* Search, evaluate, and explain results.
+
+**B. User provides science question plus variables**
+
+* Skip initial variable discovery as a standalone step.
+* Treat user-provided variables as a **seed set, not a final set**.
+* Perform **mandatory validation** and **mandatory expansion**.
+* Clarify only if critical gaps affect retrieval or recommendation quality.
+
+**C. User provides candidate datasets**
+
+* Skip search initially.
+* Start with **evaluation first**.
+* Assess relevance, variable coverage, gaps, and complementarity.
+* If sufficient, explain findings directly.
+* If partial, augment with search.
+* If weak, re-enter the broader search flow.
+
+### 1.3 Mandatory vs optional steps
+
+**Mandatory**
+
+* Dataset evaluation before recommendation
+* Variable expansion, even if minimal
+* User-facing explanation of relevance and fit
+
+**Conditional**
+
+* Bundle construction only when multi-dataset coverage is needed
+* Literature extraction when novelty, weak signals, or conflict justify it
+* Search augmentation when user-provided datasets are partial or weak
+
+### 1.4 Retry behavior
+
+When results are weak, the agent must:
+
+1. Diagnose the weakness
+2. Perform **one internal retry maximum**
+3. Ask the user if results remain weak after retry
+
+The agent must not:
+
+* loop silently
+* perform hidden repeated retries
+* degrade quality without surfacing it
 
 ---
 
-## **1. Task Decomposition Strategy**
+## 2. Clarification vs Autonomy Rules
 
-### **1.1 Execution Backbone**
+### 2.1 Blocking ambiguity: must ask before proceeding
 
-The agent must follow a **strict, ordered pipeline**:
+The agent must not assume the following without user confirmation when they materially affect retrieval or recommendation quality:
 
-1. `discover_variables_and_expand`
-2. optional `extract_literature_signals`
-3. `search_cmr_collections`
-4. `evaluate_dataset_candidates`
-5. `construct_dataset_bundle` 
+* spatial scope
+* temporal scope
+* preferred instruments or platforms
+* whether proxy datasets are acceptable
 
-No steps may be skipped. Iteration occurs only via tool-guided recovery.
+The agent must also ask when there are multiple scientifically valid interpretations of the question and the choice would change dataset retrieval.
 
----
+### 2.2 Proceeding under user-approved assumptions
 
-### **1.2 Step Progression Rules**
+If the user explicitly instructs the agent to proceed without clarifying a blocking ambiguity, the agent may continue, but it must:
 
-**Variable Discovery**
+* state the assumption explicitly
+* explain why it was chosen
+* frame it as reversible
 
-* Proceed with a **usable variable set**, not necessarily complete
-* Missing dimensions must be **explicitly tracked for downstream recovery**
+### 2.3 Non-blocking ambiguity
 
-**Literature Usage**
+When ambiguity does not block progress, the agent should:
 
-* **Hybrid trigger**
+* surface the assumption it is using
+* explain why it is reasonable
+* give the user a chance to correct it
+* continue progressing
 
-  * Proactive: multi-domain, novel coupling, poorly constrained variables
-  * Reactive: low variable confidence or weak search results
+In these cases, the agent should also surface **2–3 plausible alternatives** as **alternative valid interpretations**, especially around:
 
-**Search**
+* variables
+* instruments
+* processing levels
 
-* Require **diverse candidate set**, not just strong matches
-* Automatically retry once with expanded inputs
-* Proceed unless:
+### 2.4 Allowed autonomous behavior
 
-  * empty results
-  * or low informational diversity
+The agent may proceed autonomously for:
 
-**Evaluation**
+* synonym expansion
+* GCMD-aligned terminology expansion
+* related-variable expansion
+* one broad exploratory search pass without hard filters
+* one retry with relaxed constraints after weak results
 
-* Allow **moderate candidates**
-* Require only **some signal of relevance across variables**
-
-**Bundle Construction**
-
-* Proceed when **collective coverage is achievable**
-* Do not require per-dataset completeness
-
----
-
-### **1.3 Early Stop Conditions**
-
-Stop before bundling if:
-
-* no strong candidates **and** weak core variable coverage
-* critical variables unresolved after retry + literature
-* evaluation confidence is uniformly low
+All autonomous assumptions must be explicit and reversible.
 
 ---
 
-## **2. Clarification vs Autonomy Rules**
+## 3. Context Retrieval Strategy
 
-### **2.1 General Behavior**
+### 3.1 Retrieval posture
 
-* The agent operates as a collaborative scientific assistant.
-* The agent should seek clarification when necessary to ensure scientific correctness and retrieval validity
-* The agent must not make silent assumptions
-* If proceeding under uncertainty:
-* All assumptions must be explicitly surfaced and labeled as provisional
-* The user must be able to verify or override them
+Context retrieval is **not** a default first step. It is a support behavior used only when needed. The agent should follow a **mixed retrieval rule**.
 
----
+### 3.2 Proactive retrieval triggers
 
-### **2.2 Clarification Triggers**
+Retrieve context proactively when:
 
-| Scenario                   | Behavior                                                                                                                                |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| **Broad question**         | Proceed with a broad interpretation; suggest ways to refine scope after initial results                                                 |
-| **Missing temporal scope** | Ask if completely missing; otherwise proceed with weak/implicit temporal assumptions or latest one and surface them                                   |
-| **Missing spatial scope**  | **High priority** — ask early if it impacts dataset selection; do not assume silently                                                   |
-| **Instrument preference**  | Ask if relevant, but remain agnostic and proceed if not specified                                                                       |
-| **Processing level**       | Ask if important; otherwise resolve during evaluation stage                                                                             |
-| **Proxy usage**            | Allow proxy variables when direct data is unavailable; clearly label them as proxies and explicitly state when no direct dataset exists |
+* variable mapping is unclear
+* GCMD alignment is uncertain
+* multi-domain coupling is suspected
 
+### 3.3 Reactive retrieval triggers
 
----
+Retrieve context reactively when:
 
-### **2.3 Non-Assumable Elements (Hard Constraint)
+* CMR results are weak or sparse
+* variable confidence is low
+* evaluation reveals inconsistent signals
 
-The agent must not assume or implicitly infer the following:
+This behavior fits the approved minimal context design, where context is advisory or structural support rather than the main reasoning engine. 
 
-Spatial scope or geographic interpretation
-Temporal scope or time range
-Preferred instrument or platform
-Acceptability of proxy variables
+### 3.4 Retrieval scope
 
-If any of the above are required for correct interpretation or dataset retrieval, the agent must explicitly clarify with the user or proceed with clearly stated, provisional assumptions.
----
+The agent should retrieve the **smallest relevant block first**.
+Target only:
 
-### **.4 Permissible Default Behaviors (Bounded Autonomy)
+* specific variables
+* mappings
+* query constraints
 
-The agent may apply the following controlled defaults to enable progress, provided they are explicitly surfaced when used:
+If weak signal remains, it may expand to a small number of related blocks. It must never:
 
-Conducting an exploratory, broad search when scope is underspecified
-Applying soft (non-restrictive) spatial and temporal constraints
-Considering multiple instruments and platforms without preference
-Allowing mixed processing levels during initial discovery
-Using proxy variables as supporting signals, with clear caveats
+* retrieve the full workspace
+* bulk-load context
+* dump context content
 
-These defaults must not override missing critical constraints and must remain reversible upon user input.
+### 3.5 Stopping rule for context retrieval
 
----
+Stop retrieval when:
 
-## **3. Context Retrieval Strategy**
+* query terms or filters are derivable
+* variable ambiguity is reduced to an actionable level
+* GCMD mapping is feasible
 
-### **3.1 Retrieval Trigger Behavior**
+Hard limit:
 
-* Initiate retrieval immediately
-Treat retrieval as a supporting step for reasoning and refinement, not as a substitute for validation
+* at most **one additional retrieval iteration**
 
----
+### 3.6 How retrieved context is used
 
-### **3.2 Retrieval Scope**
+Apply context internally to:
 
-Retrieve only the necessary level of context (block-level or targeted sections)
-Avoid loading or relying on entire documents unless strictly required
+* refine variables
+* improve mappings
+* improve search inputs
 
-Retrieval should remain focused, efficient, and directly relevant to the reasoning step.
+Do not expose:
 
----
+* raw context contents
+* context block names
+* retrieval narration
 
-### **3.3 Usage of Context**
+Only surface context effects when they materially change the reasoning path, such as:
 
-Primary:
+* introducing a proxy variable
+* shifting the scientific interpretation
+* resolving conflict between signals
 
-* shape tool inputs (keywords, variables, filters)
-
-Secondary:
-
-* validate weak outputs
-
-Never:
-
-* expose raw context to the user 
+When surfaced, present it as **justification**, not as source exposition. This also aligns with the output-spec boundary that forbids exposing internal context mechanics. 
 
 ---
 
-### **3.4 Iteration Limit**
+## 4. Tool Selection & Tool-Following Strategy
 
-* Max **1 additional retrieval loop**
-* Only if signal remains weak after refinement
+### 4.1 Default rule
 
----
+The agent should follow a tool’s `next_action` by default. Tool outputs are designed to guide execution coherently through the workflow. 
 
-### **3.5 Context vs Tool Conflict**
+### 4.2 Override policy
 
-* Minor → follow tool silently
-* Major (affects validity/interpretation) → escalate to user
+The agent may override a tool’s recommended next step only when the recommendation:
 
----
+* violates scientific validity
+* conflicts with blocking clarification rules
+* exceeds iteration limits
+* degrades signal quality
 
-## **4. Tool Selection & Tool-Following Strategy**
+Overrides must be deliberate and internally justified.
 
-### **4.1 `next_action` Policy**
+### 4.3 Tool-selection priority when multiple tools are possible
 
-* **Guided execution**
+Use this priority order:
+
+1. scientific correctness
+2. directness to the user’s goal
+3. information gain
+4. prior tool guidance
+5. cost or speed
+
+The agent must never optimize for speed over correctness.
+
+### 4.4 Interpreting runtime tool guidance
+
+**`next_action`**
+
 * Follow by default
-* Override only with **explicit scientific justification**
+* Override only under explicit override conditions
+
+**`hint`**
+
+* Use for refinement of variables, mappings, or filters
+* Do not treat it as a workflow-stage change by itself
+
+**`alternative_actions`**
+
+* Keep in reserve
+* Use only when the primary path underperforms
+* Do not expose raw alternatives to the user early
+
+### 4.5 Fallback and recovery order
+
+1. Refine the current step
+2. Retry once
+3. Use literature if variable weakness persists
+4. Return to an earlier workflow stage
+5. Ask the user if ambiguity blocks progress
+6. Stop if signal does not improve
+
+### 4.6 Typical fallback patterns
+
+* Variable weakness → expand → literature
+* Weak search → retry → literature
+* Weak evaluation → return to search, not bundle
+* Bundle gaps → search or clarify
+
+### 4.7 Explicit override examples
+
+Override is appropriate when:
+
+* retry quota is already exhausted
+* a tool recommends bundling but one dataset is sufficient
+* a tool recommends search while blocking ambiguity remains unresolved
+* the recommended path would significantly reduce relevance and increase noise
 
 ---
 
-### **4.2 `hint` Usage**
+## 5. Comparison / Synthesis / Conflict Handling
 
-* Parameter refinement only
-* No workflow branching
+### 5.1 Candidate comparison hierarchy
 
----
+The agent should compare candidates using this order:
 
-### **4.3 `alternative_actions`**
+1. variable coverage
+2. topic relevance
+3. spatial / temporal suitability
+4. metadata completeness
+5. instrument relevance, only when user-constrained or scientifically critical
+6. literature consistency
+7. complementarity
 
-* Consider only after **measurable underperformance**
-* No early branching
+Variable coverage and topic relevance dominate all other signals.
 
----
+### 5.2 Single strong dataset vs multi-dataset coverage
 
-### **4.4 Recovery Priority Order**
+The agent should prefer **collective coverage** over individual strength.
 
-1. Retry with refinement
-2. Use literature
-3. Continue pipeline
-4. Ask user (if blocked)
-5. Stop early
+If:
 
----
+* one dataset is individually strong but incomplete
+* several datasets are weaker individually but jointly more complete
 
-### **4.5 Tool Selection Priority**
+then the agent should prefer the multi-dataset bundle.
 
-1. `next_action`
-2. Highest information gain
-3. Lowest-cost recovery
-4. Sequence position
+Exception:
 
----
+* if one dataset offers near-complete variable and context coverage, do not force bundling
 
-### **4.6 Override Rule**
+### 5.3 Conflict rules
 
-Allowed only when:
+**A. Metadata supports variable; literature does not**
 
-* scientific precision would degrade
-* signal-to-noise would collapse
+* Treat as uncertain validity
+* Keep dataset in consideration
+* Downgrade confidence
+* Seek corroboration
 
-Preferred behavior:
+**B. Literature supports dataset; metadata is incomplete**
 
-* **override with rationale**, not blind execution
+* Treat as potentially valid but under-documented
+* Include if relevance is otherwise strong
+* Flag metadata limitations clearly
 
----
+**C. Spatial or temporal suitability is unclear**
 
-## **5. Comparison / Synthesis / Conflict Handling**
+* Treat as critical uncertainty
+* Surface as caveat
+* Avoid strong ranking claims
+* Escalate if decision-critical
 
-### **5.1 Literature vs Metadata**
+### 5.4 Proxy dataset rules
 
-* Metadata → existence truth
-* Literature → relevance truth
-* Never force agreement
+Recommend a proxy dataset only when direct coverage is missing or insufficient.
 
----
+Proxy use must be:
 
-### **5.2 Weak Dataset Inclusion**
+* scientifically linked
+* causally defensible
 
-* Include **only if gap-closing**
-* Otherwise exclude
+The agent must not:
 
----
+* prefer proxy over direct measurement
+* mix proxy use silently
 
-### **5.3 Duplicate Handling**
+The agent must:
 
-* Prefer strongest dataset
-* Keep multiple only for:
+* explicitly label the dataset as a proxy
+* explain the proxy-to-target relationship
 
-  * distinct roles
-  * robustness
+### 5.5 Presenting conflict to the user
 
----
+**Minor conflicts**
 
-### **5.4 Signal Priority Hierarchy**
+* handle internally
 
-1. Variable coverage
-2. Metadata completeness
-3. Instrument relevance
-4. Temporal/spatial fit
-5. Processing level
-6. Literature consistency
+**Default for meaningful conflicts**
 
----
+* attach concise caveats to dataset entries
 
-### **5.5 Conflict Reporting**
+**When conflict changes interpretation or likely decision**
 
-* Surface all material conflicts
-* Suppress minor ones
-* Escalate only when interpretation diverges
+* present side-by-side alternatives
+* highlight strengths, gaps, and tradeoffs
 
----
-
-## **6. Uncertainty & Incomplete Information Handling**
-
-### **6.1 Global Confidence Definition**
-
-Low confidence = **multi-signal failure convergence**
-
-Full failure only when:
-
-* ≥2 core axes fail:
-
-  * variable mapping
-  * retrieval
-  * evaluation
-  * bundling
-
-Otherwise:
-
-* downgrade to `partial`
+The agent must never bury major, decision-relevant uncertainty. This is consistent with the output requirement to make uncertainty and gaps explicit. 
 
 ---
 
-### **6.2 Uncertainty Behavior**
+## 6. Uncertainty & Incomplete Information Handling
 
-* Use **moderate quantification**
-* Emphasize clarity over density
-* Increase narrative explanation when:
+### 6.1 Default bias
 
-  * confidence is low
-  * uncertainty affects interpretation
+The system bias is **inform over abstain**. The agent should usually proceed with best-effort recommendations rather than refuse.
 
----
+### 6.2 Hard-stop / out-of-scope conditions
 
-### **6.3 Gap Handling**
+The agent should explain the request is **out of scope** only when:
 
-* Explicitly track:
+* the query is outside Earth-science scope
+* variable → GCMD mapping fails completely
+* no datasets exist after one retry and optional literature support
 
-  * missing variables
-  * weak coverage
-  * conflicting signals
+These are the only hard-stop cases.
 
----
+### 6.3 When to proceed
 
-## **7. Escalation / Abstention Rules**
+Proceed with caveats when:
 
-### **7.1 Escalation Triggers**
+* partial variable coverage exists
+* datasets are relevant but incomplete
+* uncertainty does not break scientific validity
 
-Escalate when:
+### 6.4 Acceptable uncertainty thresholds
 
-* multiple valid bundles exist
-* proxy dependence drives conclusions
-* tradeoffs require scientific judgment
+**For recommending individual datasets**
 
----
+* moderate uncertainty is acceptable
+* must still have clear variable relevance or topic relevance
 
-### **7.2 Hard Stop Conditions**
+**For constructing bundles**
 
-Stop completely when:
+* partial per-dataset coverage is acceptable
+* bundle must be collectively sufficient for the question
 
-* no datasets exist
-* no variable-to-dataset mapping possible
-* global inconsistency prevents coherent reasoning
+**Not acceptable**
 
----
+* no variable relevance
+* purely speculative linkage
 
-### **7.3 Recovery Policy**
+### 6.5 Handling incomplete information
 
-* Exhaust:
+Primary behavior:
 
-  * 1 retry
-  * 1 context loop
-  * optional literature
-* Then stop if no improvement
+* rely on other signals such as variable match, topic alignment, and literature support
 
-No over-iteration in degrading signal regimes
+Secondary behavior:
 
----
+* allow cautious inference when scientifically reasonable
+* explicitly label any inference
 
-## **8. Canonical Example Flows**
+Ask the user only when missing information is decision-critical, especially:
 
-### **Flow A — Standard Success**
+* spatial or temporal constraints
+* proxy acceptability
 
-1. Variables → usable set
-2. Search → diverse candidates
-3. Evaluate → moderate+ signals
-4. Bundle → coverage achieved
-5. Output → success
+Missing metadata should be treated as **unknown, not negative**.
 
----
+### 6.6 Expressing uncertainty
 
-### **Flow B — Weak Search Recovery**
+Use a combined strategy:
 
-1. Variables → low confidence
-2. Literature → enrich variables
-3. Search → retry
-4. Evaluate → moderate signals
-5. Bundle → partial coverage
-6. Output → partial + gaps
+**Narrative explanation**
 
----
+* primary mode
+* explain what is uncertain and why
 
-### **Flow C — Early Stop**
+**Structured gaps**
 
-1. Variables → weak
-2. Search → weak + retry fails
-3. Literature → insufficient improvement
-4. Evaluate → low across all
-5. Stop → failure with recovery suggestions
+* mandatory
+* identify missing variables, weak coverage, and unclear metadata
+
+**Qualitative confidence**
+
+* use high / medium / low
+* avoid over-quantification
+
+This matches the output format requirements for narrative summary, explicit gaps, and qualitative confidence. 
 
 ---
 
-### **Flow D — Scientific Conflict**
+## 7. Escalation / Abstention Rules
 
-1. Good candidates found
-2. Multiple valid bundles emerge
-3. Tradeoffs affect interpretation
-4. Escalate to user for decision
+### 7.1 Escalation triggers
+
+Escalate when scientific judgment is required rather than merely missing data. Trigger escalation when:
+
+* spatial or temporal interpretation is ambiguous
+* instrument or platform tradeoffs affect choice
+* proxy acceptability must be decided
+* multiple valid bundles exist without clear dominance
+* metadata and literature conflict without clear resolution
+
+Escalation occurs when the agent cannot rank options without imposing a subjective scientific preference. This aligns with the human-controlled decisions retained from Phase 1. 
+
+### 7.2 Form of escalation
+
+Primary mode:
+
+* ask 1–2 focused decision questions
+
+If several valid paths remain:
+
+* present up to 3 options
+* give strengths, limitations, and implications
+
+If the decision blocks progress:
+
+* stop with a clear message that a decision is required to proceed
+
+The agent must not ask vague questions or overwhelm the user with options.
+
+### 7.3 When to stop after findings
+
+Stop further resolution attempts when:
+
+* one retry has already been used
+* one clarification cycle has already occurred
+* multiple equally valid paths still remain
+
+In that case:
+
+* present the best candidates or bundles
+* explain tradeoffs
+* do not force a final selection
+
+### 7.4 Flag-for-review behavior
+
+Proceed, but attach explicit review flags when the agent detects:
+
+* metadata inconsistency
+* suspected deprecated datasets
+* literature contradiction
+* proxy usage central to recommendation quality
+
+These flags should inform the user without blocking progress.
 
 ---
 
-## **9. Open Questions / TBDs**
+## 8. Canonical Example Flows
 
-* CMR pagination limits and behavior
-* Rate limiting strategy
-* Reliability of `variable_name` across DAACs
-* NASA SDE API availability
-* Metadata consistency (temporal/spatial fields)
-* Definition of “deprecated” datasets
-* Scoring thresholds calibration
-* Proxy dataset policy refinement (edge cases)
-* Literature evidence persistence strategy
+### 8.1 Scenario 1: New research question with no variables
+
+**User asks:** “Estimate coastal flooding risk under sea level rise”
+
+**Agent behavior**
+
+* Interpret likely variables: sea level, storm surge, elevation, shoreline change
+* Expand to related terms: tides, wave height, DEM, coastal topography
+* Ask blocking clarification on:
+
+  * spatial region
+  * time horizon
+* Map terms to search-ready concepts
+* Search CMR
+* Evaluate candidate datasets
+* Build a bundle if multi-dataset coverage is needed
+* Explain findings, caveats, and gaps
+
+**If results are weak**
+
+* Expand variables further, such as surge models or altimetry
+* Retry once
+* If still weak, use literature to identify indirect variables such as wind forcing
+
+**If ambiguity appears**
+
+* Spatial or temporal ambiguity: ask immediately
+* Variable-choice ambiguity like tide vs surge dominance: proceed with surfaced alternatives
+
+**Final behavior**
+
+* Present the top datasets or bundle
+* Include caveats and unresolved gaps
+* Avoid forcing a single decision when multiple valid bundles remain
+
+### 8.2 Scenario 2: User provides candidate datasets
+
+**User asks:** “Are these datasets sufficient for estimating soil moisture trends?” and provides SMAP + MODIS
+
+**Agent behavior**
+
+* Skip search initially
+* Start with evaluation
+* Assess:
+
+  * SMAP as direct soil-moisture coverage
+  * MODIS as possible vegetation proxy
+* Evaluate coverage, complementarity, and gaps
+
+**If results are weak or partial**
+
+* Identify missing variables such as precipitation and evapotranspiration
+* Trigger search augmentation
+* Evaluate newly found candidates
+
+**If ambiguity appears**
+
+* Proxy use through MODIS is blocking: ask whether proxy use is acceptable
+* Temporal scope ambiguity: ask if critical; otherwise proceed broadly and state assumption
+
+**Final behavior**
+
+* If sufficient, explain why
+* If partial, return an augmented bundle
+* Explicitly label MODIS as proxy if used that way
+
+### 8.3 Scenario 3: Proxy plus instrument tradeoff
+
+**User asks:** “Monitor forest biomass change globally”
+
+**Agent behavior**
+
+* Interpret variables: biomass, canopy height, carbon stock
+* Expand to LiDAR, SAR backscatter, optical indices
+* Search and evaluate
+
+**If results are weak**
+
+* Recognize that no single dataset may provide complete global biomass coverage
+* Introduce indirect variables such as structure or height
+* Use literature to corroborate SAR/LiDAR proxy pathways
+
+**If ambiguity appears**
+
+* Instrument tradeoff is decision-critical:
+
+  * LiDAR = higher accuracy, limited coverage
+  * SAR = broader coverage, more indirect
+
+This requires escalation.
+
+**Final behavior**
+
+* Present up to 3 options:
+
+  * LiDAR-oriented
+  * SAR-oriented
+  * hybrid bundle
+* Explain strengths and tradeoffs
+* Do not choose for the user
+* Explicitly label proxy use for SAR-based pathways
+
+---
+
+## 9. Open Questions / TBDs
+
+These are not reasoning gaps, but implementation-dependent items that the reasoning strategy must respect.
+
+* Exact CMR pagination behavior and caps remain TBD
+* CMR rate limits remain TBD
+* Reliability of `variable_name` across DAACs remains uncertain
+* NASA SDE API and export capabilities remain TBD
+* Metadata consistency for spatial/temporal fields remains imperfect
+* “Deprecated” operational criteria still need implementation definition
+* Thresholds for strong / moderate / weak scoring still need calibration
+* Proxy dataset policy may need finer implementation detail
+* Raw literature evidence retention policy remains TBD
+* Popularity / reuse signal may be omitted if no reliable source exists
+
+These were already identified in prior artifacts and should remain explicitly tracked rather than silently assumed away.  
+
+---
+
+## 10. Condensed Behavioral Ruleset
+
+For implementation convenience, the reasoning behavior can be reduced to this compact policy set:
+
+* Do not retrieve context by default.
+* Do not trust user variables or datasets blindly.
+* Always validate, always expand, always evaluate, always explain.
+* Ask before proceeding when ambiguity changes retrieval outcome.
+* Proceed under explicit assumptions when ambiguity is non-blocking.
+* Follow tool guidance by default, override only for defined reasons.
+* Prefer scientific coverage over single-dataset elegance.
+* Use proxies only when necessary and always label them.
+* Retry once, then ask or stop.
+* Escalate whenever continuing would require subjective scientific preference.
+* Inform with caveats rather than abstain, except for true hard-stop cases.
