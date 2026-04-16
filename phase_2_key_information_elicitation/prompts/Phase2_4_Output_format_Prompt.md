@@ -15,8 +15,6 @@ You define how the agent’s outputs should represent:
 * tool-driven next steps,
 * and structured recovery information.
 
-This stage extends the prior output-format role so outputs reflect the CARE V2 system: context-aware, tool-aware, and auditable.
-
 ## **G — Goal / Task Definition**
 
 Interview SMEs to collect all critical requirements governing **how the downstream agent must structure its outputs**.
