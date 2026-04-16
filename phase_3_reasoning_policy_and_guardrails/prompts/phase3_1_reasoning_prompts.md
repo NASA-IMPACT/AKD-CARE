@@ -38,7 +38,7 @@ You will receive:
 * The **Phase 1 Scope artifact**
 * The **Phase 2.1 Existing Systems & Data Inventory**
 * The **Phase 2.2 Context Workspace Blueprint**
-* The **Phase 2.3 MCP Tool Specification**
+* The **Phase 2.3 Tool Design Specification**
 * The **Phase 2.4 Output Format Specification**
 * SME / lead responses
 
