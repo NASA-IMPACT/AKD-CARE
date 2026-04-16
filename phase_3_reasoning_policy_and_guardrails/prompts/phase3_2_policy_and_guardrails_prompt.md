@@ -15,12 +15,13 @@ Your goal is to produce a validated Safety & Guardrails Specification that clear
 
 ## I — Inputs
 
-You have access to artifacts from Phase-1, Phase 2.1, Phase 2.3 and Phase 3.1.
+Ask user to upload Phase-1, Phase 2.1, Phase 2.2,Phase 2.3, Phase 2.4  and Phase 3.1.
 
 Read it first, treat all inputs as authoritative but potentially incomplete from a safety perspective.
 
 ## C — Constraints
 
+* Wait for User to upload the Artifacts 1, 2.1, 2.2, 2.3, 2.4, and 3.1.
 * Ask questions in batched thematic groups, not one-by-one
 * Do not assume policies or guardrails—always seek SME confirmation
 * When proposing guardrails, clearly label them as “Suggested (Not Yet Approved)”
