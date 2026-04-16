@@ -78,32 +78,43 @@ Produce a **Reasoning Strategy Specification** organized into sections such as:
    * what outputs must look like.
 2. Confirm this understanding before proceeding.
 3. Ask about **task decomposition**:
+ * Ask:
+     * “When the agent receives a typical request, how should it break the work into steps?”
+     * “Are there standard ‘recipes’ or workflows it should follow?”
+     * “Which steps are mandatory vs optional?”
+   * Capture patterns like *Plan → Retrieve → Analyze → Decide → Explain*
 
-   * How should the agent break down common tasks?
-   * What workflows or recipes should it follow?
 4. Ask about **clarification vs autonomy**:
+ * Ask:
+     * “When should the agent ask the user clarifying questions instead of guessing?”
+     * “What are examples of things it must never assume?”
+     * “In which situations can it safely make reasonable assumptions?”
+   * Clarify thresholds: when to ask vs infer vs proceed
 
-   * When must it ask the user?
-   * What may it assume?
-   * What must it never assume?
 5. Ask about **context retrieval strategy**:
 
    * When triggers exist, how should the agent decide whether to retrieve context immediately, defer, or proceed?
    * How much context should it retrieve?
    * How should it decide retrieval is sufficient?
    * What should it do after retrieval?
+    
 6. Ask about **tool strategy**:
 
-   * If multiple tools apply, how should it choose?
+   * “If multiple tools can answer a question, how should the agent choose?”
    * How should it interpret `next_action`, `hint`, or `alternative_actions` from tools?
-   * When should it follow tool guidance directly vs pause and ask?
+   * “What are the fallback tools if the primary one fails?”
+
 7. Ask about **conflicts and uncertainty**:
 
-   * How should it handle conflicts between context, tools, and user instructions?
-   * What should it do when still uncertain after retrieval or tool use?
+     * “How should the agent behave when it is unsure about an answer?”
+     * “When should it explicitly say ‘I don’t know’?”
+     * “When should it ask the user for more information, and what should it ask?”
 8. Ask about **escalation / abstention**:
 
-   * When must it stop, abstain, or escalate?
+  * Ask:
+     * “In what situations must the agent stop and escalate to a human?”
+     * “What conditions should cause it to refuse or abstain?”
+     * “What kinds of issues should it flag for later review?”
 9. Walk through 1–3 example scenarios and capture the preferred behavioral flow.
 10. Produce the final **Reasoning Strategy Specification**
 11. Mark all unresolved items as **TBD**
