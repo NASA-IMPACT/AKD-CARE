@@ -210,7 +210,7 @@ For granule search, the same request model can be used, but unsupported paramete
 You asked for:
 
 * no raw CMR response shown to the user
-* normalized collection list
+* normalized collection list based on Output Format artifacts 
 * output aligned to the agent’s style rather than API format
 
 So the tool should return **normalized results only** at the runtime contract layer. Internally it may preserve raw payloads for logging, but they should not be surfaced to the agent as the primary payload. The normalized fields above come from the fields your inventory says are actively used. 
