@@ -1,353 +1,235 @@
+# Tool Specification
 
 ## 1. Workspace / Tool Organization
 
-You chose grouping by **system**, with shared validation under `/tools/shared`, and the tool/server name **`CMR_MCP_Server`**. 
+Canonical workspace:
 
 ```text
-/workspace
-  /tools
-    /cmr
-      /CMR_MCP_Server
-        tool.yaml
-        handler.py
-        contract.md
-        /schemas
-          cmr_search_request.schema.json
-          cmr_search_response.schema.json
-        /mappers
-          collections_normalizer.py
-          granules_normalizer.py
-        /clients
-          cmr_search_client.py
-        /policies
-          scope_policy.py
-    /shared
-      /validators
-        required_search_fields.py
-        page_bounds.py
-        disallowed_download_ops.py
-      /errors
-        recoverable_error.py
-        validation_error.py
-      /types
-        runtime_guidance.py
+CMR_Data_Search/
+  tools/
+    cmr/
+      CMR_MCP_Server/
 ```
 
-**Naming conventions**
+Naming conventions:
 
-* Server/container: `CMR_MCP_Server`
-* Runtime tool name: `cmr_search`
-* Schemas: `<tool>_<request|response>.schema.json`
-* Shared validators live in `/tools/shared/validators`
+* Tool folders: `CMR_Data_Search` for standalone server-style tools
+* Domain folder: lowercase by source or capability, here `cmr`
+* One approved tool only in this phase: `CMR_MCP_Server`
 
-**Grouping strategy**
+Notes:
 
-* Group by **system** (`/cmr`), not by workflow, because this tool is a deterministic CMR execution unit rather than a reasoning or curation unit. That matches your boundary decision that query construction and metadata interpretation stay outside the tool. 
-
-**Where logic lives**
-
-* CMR request/response schema: `/tools/cmr/CMR_MCP_Server/schemas`
-* Response normalization: `/tools/cmr/CMR_MCP_Server/mappers`
-* Common validation and scope guards: `/tools/shared/validators`
-* Download/scope blocking rules: `/tools/cmr/CMR_MCP_Server/policies`
+* Keep GCMD keyword expansion and CMR parameter references in **context**, not in tool logic, unless later evidence shows they must become executable validation assets.
+* This tool is limited to **CMR collection search and query refinement**, not scientific judgment, literature reasoning, or dataset choice finalization.   
 
 ## 2. Proposed Tool Inventory
 
-### Tool inventory
+### `CMR_MCP_Server`
 
-Only **one tool** is approved:
+Purpose:
 
-* **`cmr_search`**
+* Execute CMR collection search with allowed filters
+* Validate search inputs
+* Detect over-constrained searches
+* Perform one bounded refinement retry
+* Return structured search results plus match explanations
 
-This tool handles:
+Not included:
 
-* CMR query validation
-* search execution
-* one-page retrieval
-* search-only scope enforcement
-* normalized response shaping
-* runtime guidance for continuation and recovery
+* Deciding scientific relevance
+* Choosing preferred instrument
+* Interpreting ambiguous spatial / temporal intent
+* Literature extraction
+* Final cross-dataset curation judgment 
 
-This tool does **not** do:
+## 3. Tool Spec (Minimal Contract)
 
-* keyword expansion
-* scientific variable inference
-* metadata interpretation
-* dataset ranking
-* final dataset selection
-* download orchestration
+### Tool Name
 
-## 3. Tool-by-Tool Contract
-
-### Tool name
-
-`cmr_search`
+`CMR_MCP_Server`
 
 ### Purpose
 
-Execute validated NASA CMR searches for collections and granules, return normalized results, and instruct the agent on whether and how to continue paging or refine the request. This fits the current workflow where researchers search CMR, inspect metadata, refine queries, and repeat.
+Run validated CMR collection searches and perform one constrained refinement pass when the original query is too restrictive.
 
-### When it should be used
+### Trigger Condition
 
-Use this tool only when:
+Call this tool when the agent needs to:
 
-* the agent has already clarified the search request
-* vague keywords have already been cleaned before the tool call
-* the agent has selected concrete CMR parameters
-* the task is **search**, not download
+* search CMR collections
+* apply collection filters
+* retrieve top dataset candidates
+* explain why returned collections matched
+* recover from weak or zero-result searches without changing user-fixed constraints
 
-Do not use this tool for:
+### Inputs
 
-* keyword expansion reference lookup
-* variable discovery from literature
-* scientific interpretation of returned metadata
-* auto-selecting a final dataset shortlist without human confirmation
+At least one of the following must be present:
 
-### Scope
+* `keyword`
+* `short_name`
+* `version`
+* `provider`
+* `platform`
+* `instrument`
+* `processing_level`
+* `temporal`
+* `bounding_box`
 
-* **Allowed:** collection search and granule search
-* **Rejected:** download actions and download orchestration
-* **No auth fields exposed:** search is open; Earthdata Login is needed for download, which is out of scope here. 
+Additional paging inputs:
 
-### Inputs / schema
+* `page_size` — max 50
+* `page_num` — 1-based
 
-```json
-{
-  "search_type": "collections | granules",
-  "keyword": "string?",
-  "short_name": "string?",
-  "version": "string?",
-  "provider": "string?",
-  "platform": "string?",
-  "instrument": "string?",
-  "processing_level": "string?",
-  "variable_name": "string?",
-  "temporal": "string?",
-  "bounding_box": "string?",
-  "page_size": "integer?",
-  "page_num": "integer?",
-  "variable_name_hint": "string?"
-}
-```
+Input field meanings:
 
-### Input notes
+* `keyword`: text search across collection metadata using AND behavior
+* `short_name`: collection short name, for example `MOD09A1`
+* `version`: collection version, for example `6.1`
+* `provider`: data provider, for example `LPDAAC_ECS`
+* `platform`: platform or satellite name, for example `Terra`
+* `instrument`: instrument name, for example `MODIS`
+* `processing_level`: one of `L0`, `L1A`, `L1B`, `L2`, `L3`, `L4`
+* `temporal`: `YYYY-MM-DDTHH:mm:ssZ,YYYY-MM-DDTHH:mm:ssZ`
+* `bounding_box`: `"west,south,east,north"`
+* `page_size`: results per page, max 50
+* `page_num`: page number starting at 1
 
-* At least one meaningful search field is required, such as `keyword`, `short_name`, `variable_name`, or another substantive CMR filter. This aligns with your instruction that one or more true CMR search fields must be present. 
-* `page_num` is 1-based in CMR. ([CMR Earthdata][1])
-* `page_size` defaults to 10 in CMR and the documented max is 2000, though you want the tool policy to cap it at **50**. That means the tool should enforce a stricter product policy than the API itself. ([CMR Earthdata][1])
-* `processing_level` is supported by CMR as an alias for `processing_level_id`. ([CMR Earthdata][1])
-* `bounding_box` is `"west,south,east,north"`. ([CMR Earthdata][1])
-* `keyword` is free text, case-insensitive, and behaves as an AND-style word search across indexed fields. Phrase syntax and wildcard limits are defined by CMR. ([CMR Earthdata][1])
-* `variable_name_hint` is **not** a CMR parameter. It is an internal helper field used only to support your rule: auto-fill `variable_name` only when explicitly provided in a separate field. That preserves transparency and avoids hidden inference.
+### Output
 
-### Request mapping rules
+Return **only structured data**.
 
-For collection search, map fields directly to CMR query parameters:
+Minimum output contract:
 
-* `keyword -> keyword`
-* `short_name -> short_name`
-* `version -> version`
-* `provider -> provider`
-* `platform -> platform`
-* `instrument -> instrument`
-* `processing_level -> processing_level`
-* `variable_name -> variable_name`
-* `temporal -> temporal`
-* `bounding_box -> bounding_box`
-* `page_size -> page_size`
-* `page_num -> page_num`
+* `normalized_query_used`
+* `results`
+* `top_results` limited to top 6
+* `total_results_found`
+* `applied_filters`
+* `relaxed_filters` if retry occurred
+* `retry_performed` boolean
+* `overconstrained_filter_hint` if applicable
+* `errors` if validation or API failure occurs
 
-For granule search, the same request model can be used, but unsupported parameters should be omitted or flagged with guidance depending on the granule endpoint’s supported parameters. The official docs distinguish collection and granule search parameter sets. ([CMR Earthdata][1])
+For each top result, include:
 
+* `ShortName`
+* `EntryTitle`
+* `Platform`
+* `Instrument`
+* `ProcessingLevel`
+* `TemporalExtent`
+* `SpatialExtent`
+* `match_reason`
 
-## 4. Validation & Business Rule Placement
-
-### In-tool validation
-
-Place these inside the tool or shared validators:
-
-**Required search content**
-
-* Reject requests with no meaningful search fields.
-* The tool should not accept a call that only contains paging controls with no substantive search criteria.
-
-**Variable enforcement**
-
-* If `variable_name` is absent and `variable_name_hint` is present, auto-fill `variable_name` from the hint and add a warning that the field was auto-filled from an explicit upstream value.
-* The tool must never infer `variable_name` on its own.
-* If neither `variable_name` nor `variable_name_hint` is provided, the tool does not fail purely for that reason, because the agent may still be making a keyword or short-name search. But if the agent knows a variable upstream, it must pass it explicitly.
-
-**Page bounds**
-
-* Enforce `page_num >= 1`.
-* Enforce product cap `page_size <= 50`, even though CMR documents a higher max. ([CMR Earthdata][1])
-
-**Temporal / spatial format**
-
-* Validate basic syntactic shape only.
-* Do not interpret scientific suitability.
-* If absent, do not auto-default silently. Your instruction is that the agent should clarify temporal and bounding box choices before relying on defaults.
-
-**Search-only scope**
-
-* Reject download requests.
-* Reject any attempt to request data access/download URLs as an operational step.
-* Allow granule search, since granule search is in scope; only download is excluded. The official API has separate collection and granule search sections. ([CMR Earthdata][1])
-
-### What stays outside the tool
-
-* keyword expansion remains in context
-* query clarification stays with the agent
-* scientific interpretation of metadata stays with the agent
-* choosing best datasets remains human-controlled and agent-assisted, but not tool-decided
-
-## 5. Response-as-Instruction Design
-
-You approved these runtime guidance fields:
-
-* `message`
-* `next_action`
-* `next_action_params`
-* `warnings`
-* `query_quality`
-* `coverage_note`
-
-### Expected runtime guidance behavior
-
-**message**
-
-* concise execution summary
-* example: “Returned 50 collection results for page 1 using keyword, platform, and variable filters.”
-
-**next_action**
-Use a compact verb set such as:
-
-* `continue_search_page`
-* `refine_query`
-* `broaden_query`
-* `narrow_query`
-* `switch_to_granule_search`
-* `stop`
-
-**next_action_params**
-Prefill likely continuation values, for example:
+Recommended structured shape:
 
 ```json
 {
-  "page_num": 2,
-  "page_size": 50,
-  "search_type": "collections"
+  "normalized_query_used": {},
+  "applied_filters": {},
+  "retry_performed": false,
+  "relaxed_filters": [],
+  "overconstrained_filter_hint": null,
+  "total_results_found": 0,
+  "top_results": [
+    {
+      "ShortName": "",
+      "EntryTitle": "",
+      "Platform": [],
+      "Instrument": [],
+      "ProcessingLevel": "",
+      "TemporalExtent": {},
+      "SpatialExtent": {},
+      "match_reason": ""
+    }
+  ],
+  "errors": []
 }
 ```
 
-**warnings**
-Examples:
+### Key Validation
 
-* `variable_name auto-filled from explicit variable_name_hint`
-* `page_size reduced to policy max 50`
-* `keyword-only search may have low precision`
-* `temporal omitted; coverage may be broad`
+Inside the tool:
 
-**query_quality**
-Suggested scoring rubric:
+* reject invalid temporal range
+* reject malformed bounding box
+* ignore empty filters
+* require at least one search input
+* normalize repeated filters
+* enforce `page_size <= 50`
 
-* `strong`: includes precise identifiers like `short_name`, `variable_name`, provider, or bounded temporal/spatial filters
-* `adequate`: valid search with moderate specificity
-* `weak`: broad keyword-only or minimally constrained search
-* `invalid`: failed validation
+Validation boundaries:
 
-**coverage_note**
-This should teach the agent what the current page means, for example:
+* syntax and parameter validity belong in the tool
+* scientific meaning of filters does not belong in the tool
 
-* “This tool returns one page only. More results may exist; call again with page_num=2 to continue.”
-* “Current page is full, so additional pages are likely.”
-* “Zero results returned; refine or broaden the query.”
+### Failure / Retry / Recovery Patterns
 
-## 6. Failure / Retry / Recovery Patterns
+#### Validation failure
 
-### Validation failure
+Return structured error with:
 
-Return:
+* failing field
+* reason
+* no retry
 
-```json
-{
-  "status": "validation_failure",
-  "message": "No substantive CMR search fields provided.",
-  "next_action": "refine_query",
-  "next_action_params": {},
-  "warnings": ["Provide at least one search parameter such as keyword, short_name, or variable_name."],
-  "query_quality": "invalid",
-  "coverage_note": "Search was not executed."
-}
-```
+#### API/search failure
 
-### Zero results
+Return structured error with:
 
-Treat as **recoverable failure** or success-with-guidance depending on implementation preference, but the contract should guide the agent to refine rather than stop. Since your workflow is iterative, the agent should be told to adjust and retry. 
+* source: `CMR`
+* failure type
+* original normalized query
+* no speculative user-facing text
 
-Recommended behavior:
+#### Weak or zero-result search
 
-* `status = recoverable_failure`
-* `next_action = broaden_query` or `refine_query`
+The tool may perform **1 retry only**.
 
-### API/network failure
+Retry rules:
 
-You asked me to take behavior from the API docs where relevant, but the docs mainly define request mechanics, not client retry policy. A reasonable contract is:
+* identify which filter likely over-constrained the query
+* relax only constraints **not explicitly fixed by the user**
+* a constraint is treated as fixed if it was mentioned in the user science query or established in a clarification answer
+* do not relax explicit user-provided constraints
+* retry with assumed parameters only when the relaxed field was not user-fixed
 
-* retry once for transient transport failure
-* then return `recoverable_failure`
-* include an actionable message rather than silently swallowing errors
+Recovery guidance returned as structured data:
 
-This is an implementation recommendation rather than a documented NASA rule.
+* `overconstrained_filter_hint`
+* `relaxed_filters`
+* updated `normalized_query_used`
 
-### Pagination / continuation
+### Hard Boundary on Constraint Relaxation
 
-You specified: **retrieve one page and tell the agent to continue**.
+Never relax fields that came directly from:
 
-Recommended policy:
+* the user science query
+* a clarification response from the user
 
-* Always return one page only.
-* If returned result count equals page size, set:
+This rule applies regardless of field type, including `instrument`, `provider`, `short_name`, `temporal`, `bounding_box`, or others if user-specified.
 
-  * `next_action = continue_search_page`
-  * `next_action_params.page_num = current_page + 1`
-* If result count is less than page size, set:
+## 4. Logic Placement Boundary
 
-  * `next_action = stop`
-  * `coverage_note = "Returned final partial page; additional pages are unlikely."`
+Belongs in tool:
 
-This aligns with the documented paging model where `page_size` and `page_num` control page retrieval. The docs also note that `page_num` is deprecated in favor of newer strategies for very large result sets, but it remains documented and functional. ([CMR Earthdata][1])
+* parameter validation
+* query normalization
+* CMR request execution
+* paging support
+* bounded retry logic
+* structured match explanation for returned datasets
 
-## 7. Tool vs Context Boundary Decisions
+Belongs in context:
 
-### Remains in context
+* CMR query parameter reference
+* keyword expansion reference
+* advisory lookup knowledge for better search recall
 
-* GCMD/keyword expansion reference
-* parameter lookup references
-* descriptive knowledge meant for human-maintained recall and search support 
+Belongs to human / agent outside tool:
 
-### Remains in agent reasoning
-
-* clarifying vague keywords with the user
-* deciding whether temporal or bounding box constraints are needed before search
-* mapping science questions to candidate variables
-* interpreting returned metadata for scientific relevance
-* comparing returned datasets and preserving user control for final selection 
-
-### Moves into the tool
-
-* deterministic request validation
-* explicit variable autofill from `variable_name_hint`
-* paging mechanics
-* scope blocking for download requests
-* normalized result formatting
-* runtime continuation guidance
-
-## 8. Security / Identity / Permission Notes
-
-* This tool is **search-only**.
-* It should expose **no auth fields**.
-* Earthdata Login is required for dataset download, but search does not require authentication. 
-* Granule search is allowed.
-* Download workflows are rejected as out of scope.
-* The tool should not accept or process token/authentication parameters unless the future scope expands beyond search.
+* scientific relevance judgment
+* preferred instrument choice
+* ambiguous temporal or spatial interpretation
+* final dataset appropriateness decision   
