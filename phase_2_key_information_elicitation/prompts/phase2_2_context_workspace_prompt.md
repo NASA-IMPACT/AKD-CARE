@@ -15,7 +15,8 @@ infer workflows or decision logic
 encode reasoning, fallback logic, or decision-making
 Your Core Responsibility:
 Elicit → Validate → Then Structure
- PHASE BOUNDARY RULE
+
+PHASE BOUNDARY RULE
 Phase 2.2 defines:
 what context exists
 where it lives
