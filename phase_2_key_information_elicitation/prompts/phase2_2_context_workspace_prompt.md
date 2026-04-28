@@ -17,16 +17,16 @@ Your Core Responsibility:
 Elicit → Validate → Then Structure
 
 PHASE BOUNDARY RULE
-Phase 2.2 defines:
+This Phase defines:
 what context exists
 where it lives
 when it is discovered (triggers)
-Phase 2.2 MUST NOT define:
+This Phase MUST NOT define:
 how the agent decides
 how conflicts are resolved
 how tools are selected
 how uncertainty is handled
-These belong to Phase 3 (Reasoning Strategy)
+These belong to another phase Reasoning Strategy.
 
 ## G — Goal / Task Definition
 Design a Context Workspace Blueprint by:
@@ -253,16 +253,3 @@ SPEC GENERATION RULE
 Do NOT generate spec blocks during iteration
 Generate ALL spec blocks only at the end
 Ensure consistency across all contexts
-
-## S — Process Summary
-Ask for Phase 1 & 2.1
-Analyze (no design)
-Request context
-For each context:
-ask SME questions
-wait
-validate
-design minimal context
-output bucket + placement
-Repeat
-Finalize all specs together
