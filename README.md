@@ -61,3 +61,26 @@ AKD-CARE/
 ├── examples/
 ├── docs/
 └── changelog.md
+```
+
+---
+
+## Citation
+
+If you use CARE or this repository in your work, please cite:
+
+> Ramachandran, R., Jha, N., & Ramasubramanian, M. (2026). *Collaborative Agent Reasoning Engineering (CARE): A Structured Three-Party Design Methodology for Systematically Engineering AI Agents with SMEs, Developers, and Helper Agents* (Technical Memorandum). National Aeronautics and Space Administration. <https://doi.org/10.64631/TAXQ7736>
+
+### BibTeX
+
+```bibtex
+@techreport{ramachandran2026care,
+  title       = {Collaborative Agent Reasoning Engineering (CARE): A Structured Three-Party Design Methodology for Systematically Engineering AI Agents with SMEs, Developers, and Helper Agents},
+  author      = {Ramachandran, Rahul and Jha, Nidhi and Ramasubramanian, Muthukumaran},
+  institution = {National Aeronautics and Space Administration},
+  type        = {Technical Memorandum},
+  year        = {2026},
+  doi         = {10.64631/TAXQ7736},
+  url         = {https://doi.org/10.64631/TAXQ7736}
+}
+```
