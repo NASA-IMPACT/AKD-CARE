@@ -100,3 +100,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 ```
 
 ---
+
+## Disclaimer
+
+This material is based upon work supported by the National Aeronautics and Space Administration under Contract No. `80MSFC22M0004`. Any opinions, findings, conclusions, or recommendations expressed in this repository are those of the authors and do not necessarily reflect the views of NASA or the United States Government.
+
+The software and associated artifacts in this repository are provided "AS IS", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and non-infringement. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability arising from the use of this material.
+
+Use of this repository does not imply endorsement by NASA, the U.S. Government, the University of Alabama in Huntsville, or any other affiliated institution.
