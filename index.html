@@ -1,0 +1,1969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="AI Agents for Science: Accelerated Knowledge Discovery — a NASA IMPACT ecosystem for designing, building, validating, and deploying trustworthy AI agents for closed-loop scientific workflows." />
+<title>AI Agents for Science · Accelerated Knowledge Discovery · NASA IMPACT</title>
+
+<!-- IBM Plex (NASA / IBM Research aligned) + Instrument Serif for display -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+<style>
+/* =========================================================
+   Design Tokens
+   ========================================================= */
+:root {
+  --bg-0:        #06080f;
+  --bg-1:        #0a0e1a;
+  --bg-2:        #11162a;
+  --surface:     #141b2e;
+  --surface-2:   #1a2238;
+  --border:      rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.16);
+
+  --text:        #e8ecf5;
+  --text-dim:    #a8b0c2;
+  --text-muted:  #6f7791;
+
+  /* Accents — NASA-adjacent: deep blue, cyan, ember orange */
+  --accent:      #5cd2e6;   /* cyan / data */
+  --accent-2:    #7aa2ff;   /* nebula blue */
+  --accent-3:    #ff8a4c;   /* NASA "worm" ember */
+  --accent-4:    #b88dff;   /* soft violet */
+
+  --glow-cyan:   0 0 0 1px rgba(92,210,230,0.25), 0 8px 40px -8px rgba(92,210,230,0.35);
+  --glow-amber:  0 0 0 1px rgba(255,138,76,0.25), 0 8px 40px -8px rgba(255,138,76,0.30);
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+
+  --maxw: 1200px;
+
+  --font-sans:   'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono:   'IBM Plex Mono', ui-monospace, monospace;
+  --font-serif:  'IBM Plex Serif', Georgia, serif;
+}
+
+/* =========================================================
+   Base
+   ========================================================= */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  background: var(--bg-0);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Cosmic background atmosphere */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(900px 500px at 12% -5%, rgba(122,162,255,0.18), transparent 60%),
+    radial-gradient(700px 400px at 95% 8%, rgba(255,138,76,0.10), transparent 60%),
+    radial-gradient(1100px 600px at 50% 110%, rgba(92,210,230,0.10), transparent 60%);
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.45) 50%, transparent 51%),
+    radial-gradient(1px 1px at 70% 60%, rgba(255,255,255,0.35) 50%, transparent 51%),
+    radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.30) 50%, transparent 51%),
+    radial-gradient(1px 1px at 85% 25%, rgba(255,255,255,0.40) 50%, transparent 51%),
+    radial-gradient(1px 1px at 10% 65%, rgba(255,255,255,0.30) 50%, transparent 51%),
+    radial-gradient(1px 1px at 55% 15%, rgba(255,255,255,0.35) 50%, transparent 51%);
+  background-size: 1200px 800px;
+  opacity: 0.6;
+}
+
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+.container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+/* =========================================================
+   Typography helpers
+   ========================================================= */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.eyebrow::before {
+  content: "";
+  width: 22px; height: 1px;
+  background: var(--accent);
+  display: inline-block;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.5em;
+  color: var(--text);
+}
+h2 { font-size: clamp(28px, 3.4vw, 44px); line-height: 1.15; }
+h3 { font-size: 20px; line-height: 1.3; }
+h4 { font-size: 16px; }
+
+p { color: var(--text-dim); margin: 0 0 1em; }
+
+.section {
+  position: relative;
+  z-index: 1;
+  padding: 110px 0 60px;
+}
+.section-head { max-width: 760px; margin-bottom: 48px; }
+.section-head p { font-size: 17px; }
+
+/* =========================================================
+   Top Navigation
+   ========================================================= */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background: rgba(6, 8, 15, 0.72);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 28px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text);
+}
+.logo-mark {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, var(--accent), var(--accent-2) 60%, #2a3a6e);
+  box-shadow: 0 0 20px rgba(92,210,230,0.35), inset 0 0 8px rgba(255,255,255,0.2);
+  position: relative;
+}
+.logo-mark::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border: 1px dashed rgba(122,162,255,0.35);
+  border-radius: 50%;
+  transform: rotate(20deg);
+}
+.logo small { color: var(--text-muted); font-weight: 400; margin-left: 6px; }
+
+.nav-links {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.nav-links a {
+  font-size: 13.5px;
+  color: var(--text-dim);
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: color .2s ease, background .2s ease;
+}
+.nav-links a:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+.nav-links a.gh {
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 6px;
+}
+.nav-links a.gh:hover { background: rgba(92,210,230,0.08); border-color: var(--accent); }
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* =========================================================
+   Hero
+   ========================================================= */
+.hero {
+  position: relative;
+  padding: 110px 0 90px;
+  overflow: hidden;
+}
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(circle at 50% 30%, #000 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(circle at 50% 30%, #000 30%, transparent 75%);
+  z-index: 0;
+}
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 980px;
+}
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: rgba(255,255,255,0.02);
+  margin-bottom: 28px;
+}
+.hero-tag .dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+.hero h1 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(40px, 6vw, 76px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 0 22px;
+}
+.hero h1 .accent {
+  font-style: italic;
+  background: linear-gradient(120deg, var(--accent) 0%, var(--accent-2) 50%, var(--accent-4) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero p.lede {
+  font-size: clamp(16px, 1.3vw, 19px);
+  color: var(--text-dim);
+  max-width: 720px;
+  margin-bottom: 40px;
+}
+
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 56px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 20px;
+  border-radius: 10px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  border: 1px solid var(--border-strong);
+  background: rgba(255,255,255,0.03);
+  color: var(--text);
+  cursor: pointer;
+  transition: transform .15s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn-primary {
+  background: linear-gradient(180deg, #1a2750, #0e1430);
+  border-color: rgba(122,162,255,0.45);
+  box-shadow: var(--glow-cyan);
+}
+.btn-primary:hover { border-color: var(--accent); }
+.btn-ghost:hover { background: rgba(255,255,255,0.06); border-color: var(--border-strong); }
+.btn svg { width: 16px; height: 16px; }
+
+/* Stat strip under hero */
+.hero-meta {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-top: 24px;
+}
+.hero-meta div {
+  background: var(--bg-1);
+  padding: 18px 22px;
+}
+.hero-meta .k {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.hero-meta .v {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  color: var(--text);
+}
+
+/* =========================================================
+   Open Project banner
+   ========================================================= */
+.open-banner {
+  position: relative;
+  z-index: 1;
+  margin-top: 30px;
+  padding: 28px 32px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(120deg, rgba(92,210,230,0.08), rgba(122,162,255,0.05) 50%, rgba(255,138,76,0.06));
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 24px;
+  align-items: center;
+}
+.open-banner .pill {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bg-0);
+  background: var(--accent);
+  padding: 6px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.open-banner p { color: var(--text); margin: 0; font-size: 15.5px; }
+.open-banner .btn { white-space: nowrap; }
+
+/* =========================================================
+   Generic card grid
+   ========================================================= */
+.cards {
+  display: grid;
+  gap: 18px;
+}
+.cards-2 { grid-template-columns: repeat(2, 1fr); }
+.cards-3 { grid-template-columns: repeat(3, 1fr); }
+.cards-4 { grid-template-columns: repeat(4, 1fr); }
+
+.card {
+  position: relative;
+  padding: 28px 26px;
+  background: linear-gradient(180deg, var(--surface), var(--bg-1));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: border-color .2s ease, transform .2s ease;
+  overflow: hidden;
+}
+.card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(92,210,230,0.5), transparent);
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+.card:hover::before { opacity: 1; }
+.card .num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--accent);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+.card h3 { margin-bottom: 10px; }
+.card p { font-size: 14.5px; line-height: 1.6; }
+
+/* =========================================================
+   CARE section
+   ========================================================= */
+.care {
+  position: relative;
+}
+.care-shell {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(800px 400px at 90% 10%, rgba(184,141,255,0.08), transparent 60%),
+    radial-gradient(700px 400px at 5% 90%, rgba(92,210,230,0.06), transparent 60%),
+    var(--bg-1);
+  padding: 48px;
+  overflow: hidden;
+}
+.care-top {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 48px;
+  align-items: start;
+  margin-bottom: 48px;
+}
+.care-top .links {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px;
+}
+
+.triad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 20px;
+}
+.triad .role {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  border-radius: var(--radius-md);
+  padding: 18px 18px;
+}
+.triad .role h4 {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.triad .role p { font-size: 13.5px; margin: 0; }
+
+/* CARE phases timeline */
+.phases {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-top: 8px;
+}
+.phase {
+  position: relative;
+  padding: 22px 18px 22px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--surface-2), var(--bg-2));
+}
+.phase .step {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--accent-3);
+  margin-bottom: 8px;
+}
+.phase h4 { font-family: var(--font-serif); font-size: 16px; margin: 0; }
+.phase::after {
+  content: "→";
+  position: absolute;
+  right: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+.phase:last-child::after { content: ""; }
+
+.targets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 36px;
+}
+.target {
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: rgba(255,255,255,0.02);
+}
+.target b { color: var(--text); display: block; margin-bottom: 4px; font-weight: 600; }
+
+/* =========================================================
+   Ecosystem cards (with GH link)
+   ========================================================= */
+.eco-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.eco-card .tag {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.eco-card h3 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 22px;
+  margin: 0;
+}
+.eco-card p { font-size: 14.5px; margin: 0; flex: 1; }
+.gh-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+  transition: color .2s ease;
+}
+.gh-link:hover { color: var(--text); }
+.gh-link svg { width: 14px; height: 14px; }
+
+/* =========================================================
+   Pipeline / pathway
+   ========================================================= */
+.pipeline {
+  margin-top: 24px;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  align-items: stretch;
+}
+.pipe-step {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 22px 18px;
+  background: linear-gradient(180deg, var(--surface), var(--bg-1));
+  text-align: left;
+}
+.pipe-step .icon {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(92,210,230,0.1);
+  color: var(--accent);
+  margin-bottom: 14px;
+  border: 1px solid rgba(92,210,230,0.25);
+}
+.pipe-step b {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 17px;
+  display: block;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.pipe-step span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.pipe-step::after {
+  content: "→";
+  position: absolute;
+  right: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent);
+  font-size: 16px;
+  font-family: var(--font-mono);
+  z-index: 2;
+}
+.pipe-step:last-child::after { content: ""; }
+
+/* =========================================================
+   Featured Agents
+   ========================================================= */
+.agent-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 280px;
+}
+.agent-card .agent-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.agent-icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(92,210,230,0.18), rgba(122,162,255,0.15));
+  border: 1px solid rgba(92,210,230,0.25);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.agent-card h3 {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  margin: 0;
+}
+.agent-card p { font-size: 14px; margin: 0; flex: 1; }
+.io-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-dim);
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+.io-row b { color: var(--accent); font-weight: 500; letter-spacing: 0.06em; }
+
+/* =========================================================
+   Workflow highlight
+   ========================================================= */
+.workflow-card {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 36px;
+  background:
+    radial-gradient(600px 280px at 100% 0%, rgba(255,138,76,0.10), transparent 60%),
+    linear-gradient(180deg, var(--surface), var(--bg-1));
+}
+.workflow-card .badge-row {
+  display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 24px;
+}
+.badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  color: var(--text-dim);
+  background: rgba(255,255,255,0.02);
+}
+.badge.live {
+  color: var(--accent);
+  border-color: rgba(92,210,230,0.35);
+  background: rgba(92,210,230,0.08);
+}
+.badge.wip {
+  color: var(--accent-3);
+  border-color: rgba(255,138,76,0.35);
+  background: rgba(255,138,76,0.06);
+}
+
+.cm1-stages {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-top: 8px;
+}
+.cm1-stages div {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 14px;
+  background: rgba(255,255,255,0.02);
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.cm1-stages div span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+/* =========================================================
+   Guardrails section
+   ========================================================= */
+.guard-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 28px;
+}
+.guard-shell {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  background: linear-gradient(180deg, var(--surface), var(--bg-1));
+}
+.guard-list {
+  list-style: none;
+  padding: 0; margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.guard-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.02);
+}
+.guard-list li::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent-3);
+  flex-shrink: 0;
+  box-shadow: 0 0 8px var(--accent-3);
+}
+.guard-cards {
+  display: grid; gap: 14px;
+}
+.guard-cards .pill-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  background: rgba(255,255,255,0.02);
+}
+.guard-cards .pill-card h4 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 17px;
+  margin: 0 0 6px;
+}
+.guard-cards .pill-card p { font-size: 13.5px; margin: 0; }
+
+/* =========================================================
+   Partners
+   ========================================================= */
+.partner-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.partner {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 22px 20px;
+  background: rgba(255,255,255,0.02);
+  transition: border-color .2s ease;
+}
+.partner:hover { border-color: var(--border-strong); }
+.partner b {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 16px;
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.partner span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.partner-notes {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 22px 24px;
+  background: linear-gradient(180deg, var(--surface), var(--bg-1));
+}
+.partner-notes p { margin: 0 0 8px; font-size: 14.5px; }
+.partner-notes p:last-child { margin: 0; }
+
+/* =========================================================
+   Team section
+   ========================================================= */
+.team-group { margin-bottom: 56px; }
+.team-group:last-child { margin-bottom: 0; }
+.team-group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 14px;
+}
+.team-group-head h3 {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  margin: 0;
+  font-weight: 500;
+}
+.team-group-head span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 18px;
+}
+.member {
+  text-align: center;
+  padding: 18px 10px;
+  border-radius: var(--radius-md);
+  transition: background .2s ease;
+}
+.member:hover { background: rgba(255,255,255,0.03); }
+.avatar {
+  --size: 84px;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  background: linear-gradient(135deg, #1f2a4a, #0e1430);
+  border: 1px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 26px;
+  color: var(--text);
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.04);
+}
+.avatar img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+/* Featured (lead) avatars get a glow */
+.member.lead .avatar {
+  box-shadow: 0 0 0 2px var(--accent), 0 0 24px rgba(92,210,230,0.35);
+}
+.member.lead .avatar::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border: 1px dashed rgba(92,210,230,0.4);
+  border-radius: 50%;
+}
+.member .name {
+  font-family: var(--font-serif);
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--text);
+  display: block;
+  line-height: 1.3;
+}
+.member .role {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 4px;
+}
+
+/* =========================================================
+   GitHub final section
+   ========================================================= */
+.gh-section {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xl);
+  padding: 56px 48px;
+  background:
+    radial-gradient(600px 320px at 0% 0%, rgba(92,210,230,0.10), transparent 60%),
+    radial-gradient(500px 300px at 100% 100%, rgba(255,138,76,0.08), transparent 60%),
+    linear-gradient(180deg, var(--surface), var(--bg-1));
+  text-align: center;
+}
+.gh-section h2 { margin-bottom: 14px; }
+.gh-section p { max-width: 640px; margin: 0 auto 28px; font-size: 16px; }
+.gh-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 36px;
+  text-align: left;
+}
+.gh-tile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,0.02);
+  transition: border-color .2s ease, transform .15s ease;
+}
+.gh-tile:hover { border-color: var(--accent); transform: translateY(-2px); }
+.gh-tile .glyph {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.gh-tile b {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 15px;
+  display: block;
+  color: var(--text);
+}
+.gh-tile span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  word-break: break-word;
+}
+
+/* =========================================================
+   Footer
+   ========================================================= */
+footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--border);
+  padding: 36px 0 60px;
+  margin-top: 80px;
+  text-align: center;
+}
+footer p {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin: 4px 0;
+}
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+@media (max-width: 1024px) {
+  .cards-4 { grid-template-columns: repeat(2, 1fr); }
+  .cards-3 { grid-template-columns: repeat(2, 1fr); }
+  .care-top { grid-template-columns: 1fr; gap: 28px; }
+  .phases { grid-template-columns: repeat(2, 1fr); }
+  .phase::after { content: ""; }
+  .targets { grid-template-columns: repeat(2, 1fr); }
+  .pipeline { grid-template-columns: repeat(2, 1fr); }
+  .pipe-step::after { content: ""; }
+  .cm1-stages { grid-template-columns: repeat(2, 1fr); }
+  .guard-grid { grid-template-columns: 1fr; }
+  .partner-grid { grid-template-columns: repeat(2, 1fr); }
+  .team-grid { grid-template-columns: repeat(4, 1fr); }
+  .gh-grid { grid-template-columns: repeat(2, 1fr); }
+  .open-banner { grid-template-columns: 1fr; text-align: left; }
+  .hero-meta { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 720px) {
+  .nav-links { display: none; }
+  .nav-links.open {
+    display: flex;
+    position: absolute;
+    top: 68px; left: 0; right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    background: var(--bg-1);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    gap: 0;
+  }
+  .nav-links.open a {
+    padding: 12px 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-toggle { display: inline-flex; }
+  .section { padding: 80px 0 40px; }
+  .care-shell, .gh-section, .workflow-card { padding: 28px 22px; }
+  .cards-2, .cards-3, .cards-4 { grid-template-columns: 1fr; }
+  .phases { grid-template-columns: 1fr; }
+  .targets { grid-template-columns: 1fr 1fr; }
+  .pipeline { grid-template-columns: 1fr; }
+  .cm1-stages { grid-template-columns: 1fr; }
+  .partner-grid { grid-template-columns: 1fr; }
+  .team-grid { grid-template-columns: repeat(3, 1fr); }
+  .gh-grid { grid-template-columns: 1fr; }
+  .triad { grid-template-columns: 1fr; }
+  .guard-list { grid-template-columns: 1fr; }
+  .hero-meta { grid-template-columns: 1fr; }
+  .container { padding: 0 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ========== NAVIGATION ========== -->
+<nav class="nav" aria-label="Primary">
+  <div class="nav-inner">
+    <a href="#top" class="logo" aria-label="AI Agents for Science home">
+      <span class="logo-mark" aria-hidden="true"></span>
+      AKD<small>· NASA IMPACT</small>
+    </a>
+
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks">MENU</button>
+
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#vision">Vision</a></li>
+      <li><a href="#objectives">Objectives</a></li>
+      <li><a href="#care">CARE</a></li>
+      <li><a href="#ecosystem">Ecosystem</a></li>
+      <li><a href="#agents">Agents</a></li>
+      <li><a href="#workflows">Workflows</a></li>
+      <li><a href="#guardrails">Guardrails</a></li>
+      <li><a href="#partners">Partners</a></li>
+      <li><a href="#team">Team</a></li>
+      <li>
+        <a class="gh" href="https://github.com/NASA-IMPACT/AI-Agents-for-Science" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.81.06 1.24.83 1.24.83.72 1.23 1.88.87 2.34.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.21 2.2.82a7.7 7.7 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ========== HERO ========== -->
+<header class="hero" id="top">
+  <div class="hero-grid" aria-hidden="true"></div>
+  <div class="container hero-inner">
+    <span class="hero-tag"><span class="dot"></span>NASA IMPACT · Public Release</span>
+
+    <h1>
+      AI Agents for Science:<br/>
+      <span class="accent">Accelerated Knowledge Discovery</span>
+    </h1>
+
+    <p class="lede">
+      A NASA IMPACT ecosystem for designing, building, validating, and deploying
+      trustworthy AI agents for closed-loop scientific workflows — built around
+      human-in-the-loop oversight, science guardrails, and open collaboration.
+    </p>
+
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/NASA-IMPACT/AI-Agents-for-Science" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.81.06 1.24.83 1.24.83.72 1.23 1.88.87 2.34.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.21 2.2.82a7.7 7.7 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        View GitHub Repository
+      </a>
+      <a class="btn btn-ghost" href="#agents">Explore Agents →</a>
+      <a class="btn btn-ghost" href="#care">Learn CARE →</a>
+    </div>
+
+    <div class="hero-meta" role="list">
+      <div role="listitem">
+        <div class="k">Methodology</div>
+        <div class="v">CARE</div>
+      </div>
+      <div role="listitem">
+        <div class="k">Pattern</div>
+        <div class="v">Closed-Loop</div>
+      </div>
+      <div role="listitem">
+        <div class="k">Oversight</div>
+        <div class="v">Human-in-the-Loop</div>
+      </div>
+      <div role="listitem">
+        <div class="k">Posture</div>
+        <div class="v">Open Science</div>
+      </div>
+    </div>
+
+    <!-- Open Project Banner -->
+    <aside class="open-banner" aria-label="Open project invitation">
+      <span class="pill">Open Project</span>
+      <p>
+        Explore the AI Agents for Science repository, contribute agents, review
+        documentation, and help build open, trustworthy AI infrastructure for science.
+      </p>
+      <a class="btn btn-primary" href="https://github.com/NASA-IMPACT/AI-Agents-for-Science" target="_blank" rel="noopener">Get Involved →</a>
+    </aside>
+  </div>
+</header>
+
+<!-- ========== VISION ========== -->
+<section class="section" id="vision">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">01 · Vision</span>
+      <h2>From utility to cognitive partner.</h2>
+      <p>
+        Accelerated Knowledge Discovery (AKD) transitions AI from a basic utility into a
+        cognitive partner in scientific workflows. It integrates specialized AI agents
+        into the scientific process to help reason through different stages of research
+        and accelerate science through <em>Closed-Loop Scientific Workflows</em>.
+      </p>
+      <p>
+        AI Agents for Science aims to build a thriving ecosystem for harmonized design,
+        development, sharing, and reuse of AI agents for the science community — where
+        scientists remain in command, and AI augments rigor instead of replacing it.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== STRATEGIC OBJECTIVES ========== -->
+<section class="section" id="objectives">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">02 · Strategic Objectives</span>
+      <h2>Four anchors guiding everything we build.</h2>
+    </div>
+
+    <div class="cards cards-4">
+      <article class="card">
+        <div class="num">01 / Time</div>
+        <h3>Reclaiming Scientist Time</h3>
+        <p>
+          Scientists often spend large portions of time on manual effort. AKD reduces
+          friction in repetitive discovery, search, synthesis, and workflow tasks so
+          scientists can focus on hypothesis generation, interpretation, and analysis.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="num">02 / Orchestration</div>
+        <h3>Cross-Disciplinary Orchestration</h3>
+        <p>
+          AKD connects information across data repositories, scientific literature,
+          code repositories, workflows, and domain tools — instead of forcing
+          scientists to work across siloed systems.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="num">03 / Infrastructure</div>
+        <h3>Uniform Infrastructure Integration</h3>
+        <p>
+          Common design patterns, SDK components, agent interfaces, guardrails, and
+          deployment pathways support AI agents across NASA science systems and
+          partner platforms.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="num">04 / Trust</div>
+        <h3>Scientific Integrity & Trust</h3>
+        <p>
+          Transparency, reproducibility, open science, human-in-the-loop oversight,
+          and science-specific guardrails are first-class design constraints — not
+          afterthoughts.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CARE ========== -->
+<section class="section care" id="care">
+  <div class="container">
+    <div class="care-shell">
+      <div class="care-top">
+        <div>
+          <span class="eyebrow">03 · Methodology</span>
+          <h2>Design with CARE.</h2>
+          <p style="font-size:17px; color:var(--text);">
+            <strong>Collaborative Agent Reasoning Engineering</strong> — a disciplined,
+            stage-gated methodology for systematically engineering AI agents for
+            scientific and technical workflows. CARE moves away from ad hoc prompt
+            tinkering toward reusable design artifacts, reviewed stage gates, and
+            human-in-the-loop oversight at every phase.
+          </p>
+          <div class="links">
+            <a class="btn btn-ghost" href="https://github.com/NASA-IMPACT/AKD-CARE" target="_blank" rel="noopener">
+              <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" width="14" height="14"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.81.06 1.24.83 1.24.83.72 1.23 1.88.87 2.34.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.21 2.2.82a7.7 7.7 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+              CARE Repository
+            </a>
+            <a class="btn btn-ghost" href="https://ntrs.nasa.gov/citations/20260000926" target="_blank" rel="noopener">📄 CARE Paper (NTRS)</a>
+          </div>
+        </div>
+
+        <div>
+          <span class="eyebrow" style="color:var(--accent-3);">— Triadic Collaboration</span>
+          <p style="margin-top:8px;">
+            CARE is grounded in a three-way collaboration where each role contributes
+            distinct authority and review responsibility throughout the design process.
+          </p>
+          <div class="triad">
+            <div class="role">
+              <h4>SMEs</h4>
+              <p>Provide domain authority and scientific constraints. Final arbiter on correctness and relevance.</p>
+            </div>
+            <div class="role">
+              <h4>Developers</h4>
+              <p>Ensure tool realism, implementation feasibility, and deployment readiness.</p>
+            </div>
+            <div class="role">
+              <h4>Helper LLMs</h4>
+              <p>Support structured elicitation, artifact drafting, and phase-aligned review.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <span class="eyebrow">CARE Phases · Stage-Gated Workflow</span>
+      <div class="phases" style="margin-top:18px;">
+        <div class="phase">
+          <div class="step">Phase 01</div>
+          <h4>Scope & Decompose</h4>
+        </div>
+        <div class="phase">
+          <div class="step">Phase 02</div>
+          <h4>Key Information Elicitation</h4>
+        </div>
+        <div class="phase">
+          <div class="step">Phase 03</div>
+          <h4>Reasoning Policy & Guardrails</h4>
+        </div>
+        <div class="phase">
+          <div class="step">Phase 04</div>
+          <h4>Prompt Architecture & Tool Orchestration</h4>
+        </div>
+        <div class="phase">
+          <div class="step">Phase 05</div>
+          <h4>Benchmarking & Verification</h4>
+        </div>
+      </div>
+
+      <div class="targets" aria-label="CARE design targets">
+        <div class="target"><b>Interaction Policy</b>How the agent talks & decides</div>
+        <div class="target"><b>Domain Grounding</b>Anchoring in scientific truth</div>
+        <div class="target"><b>Tool Orchestration</b>How tools are chosen & sequenced</div>
+        <div class="target"><b>Evaluation</b>How quality is measured</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== ECOSYSTEM ========== -->
+<section class="section" id="ecosystem">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">04 · Software Ecosystem</span>
+      <h2>The AKD stack — from primitives to production.</h2>
+      <p>
+        A coherent set of open-source libraries and platforms supporting the full
+        lifecycle: building primitives, extending with agent SDKs, benchmarking,
+        publishing, and orchestrating agents into production-ready workflows.
+      </p>
+    </div>
+
+    <div class="cards cards-3">
+      <article class="card eco-card">
+        <span class="tag">Library · Python</span>
+        <h3>AKD Core</h3>
+        <p>
+          Core Python primitives for building AKD agents, tools, streaming workflows,
+          human-in-the-loop pause points, planner registries, guardrail protocols, and
+          LLM-agnostic provider support.
+        </p>
+        <a class="gh-link" href="https://github.com/NASA-IMPACT/akd-core" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.81.06 1.24.83 1.24.83.72 1.23 1.88.87 2.34.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.21 2.2.82a7.7 7.7 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          NASA-IMPACT/akd-core
+        </a>
+      </article>
+
+      <article class="card eco-card">
+        <span class="tag">Library · Extension Layer</span>
+        <h3>AKD Ext</h3>
+        <p>
+          Opinionated extension layer with OpenAI Agents SDK integration, Pydantic
+          Agents SDK support, MCP glue, automatic tool conversion, hosted MCP
+          integration, file attachment support, and published domain agents.
+        </p>
+        <a class="gh-link" href="https://github.com/NASA-IMPACT/akd-ext" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.81.06 1.24.83 1.24.83.72 1.23 1.88.87 2.34.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.21 2.2.82a7.7 7.7 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          NASA-IMPACT/akd-ext
+        </a>
+      </article>
+
+      <article class="card eco-card">
+        <span class="tag">Platform · Production</span>
+        <h3>AKD Flow</h3>
+        <p>
+          Production multi-agent workflow interface where users compose and run
+          published agents through a planner and a visual workflow canvas — with
+          explicit human approval gates.
+        </p>
+        <a class="gh-link" href="https://github.com/NASA-IMPACT/akd/tree/main/flow" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.81.06 1.24.83 1.24.83.72 1.23 1.88.87 2.34.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.21 2.2.82a7.7 7.7 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          NASA-IMPACT/akd · flow
+        </a>
+      </article>
+
+      <article class="card eco-card">
+        <span class="tag">Platform · Internal</span>
+        <h3>AKD Labs</h3>
+        <p>
+          Internal development and benchmarking platform for creating, debugging,
+          validating, and reviewing experimental agents before publication to
+          AKD Flow.
+        </p>
+        <a class="gh-link" href="https://github.com/NASA-IMPACT/akd-labs" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.81.06 1.24.83 1.24.83.72 1.23 1.88.87 2.34.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.21 2.2.82a7.7 7.7 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          NASA-IMPACT/akd-labs
+        </a>
+      </article>
+
+      <article class="card eco-card">
+        <span class="tag">Library · Trust & Safety</span>
+        <h3>Guardrails</h3>
+        <p>
+          Reusable science-specific guardrails for checking inputs and outputs,
+          detecting risks, and supporting trustworthy agent behavior across the
+          ecosystem.
+        </p>
+        <a class="gh-link" href="https://github.com/NASA-IMPACT/akd/tree/main/guardrails" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.81.06 1.24.83 1.24.83.72 1.23 1.88.87 2.34.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.21 2.2.82a7.7 7.7 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          NASA-IMPACT/akd · guardrails
+        </a>
+      </article>
+
+      <article class="card eco-card">
+        <span class="tag">Pathway · Integrated</span>
+        <h3>End-to-End Lifecycle</h3>
+        <p>
+          Each component is intentionally composable. Teams move from CARE design
+          artifacts, through Labs benchmarking, into Flow publication — without
+          rebuilding the agent runtime contract along the way.
+        </p>
+        <a class="gh-link" href="#pathway">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          See the development pathway
+        </a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ========== AGENT DEVELOPMENT PATHWAY ========== -->
+<section class="section" id="pathway">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">05 · Development Pathway</span>
+      <h2>From design artifact to shared scientific tool.</h2>
+      <p>
+        Every agent travels a defined path. Teams first design through CARE, then
+        build and benchmark in AKD Labs, pass an SME-led readiness review, and only
+        then publish approved agents to AKD Flow and the public GitHub.
+      </p>
+    </div>
+
+    <div class="pipeline" aria-label="Agent development pipeline">
+      <div class="pipe-step">
+        <div class="icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4h13l5 5v11H3z"/><path d="M3 11h18"/></svg>
+        </div>
+        <span>Phase 1</span>
+        <b>CARE Design</b>
+      </div>
+      <div class="pipe-step">
+        <div class="icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19V5l11 7z"/></svg>
+        </div>
+        <span>Phase 2</span>
+        <b>Build & Benchmark in AKD Labs</b>
+      </div>
+      <div class="pipe-step">
+        <div class="icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <span>Phase 3</span>
+        <b>SME Review Gate</b>
+      </div>
+      <div class="pipe-step">
+        <div class="icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-7h6v7"/></svg>
+        </div>
+        <span>Phase 4</span>
+        <b>Publish to AKD Flow</b>
+      </div>
+      <div class="pipe-step">
+        <div class="icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+        </div>
+        <span>Phase 5</span>
+        <b>Share with Science Users</b>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FEATURED AGENTS ========== -->
+<section class="section" id="agents">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">06 · Featured Agents</span>
+      <h2>Specialized decision-support agents.</h2>
+      <p>
+        Each AKD agent is a focused decision-support system designed under CARE,
+        built on AKD primitives, and protected by guardrails. Scientists remain in
+        the loop and approve every consequential step.
+      </p>
+    </div>
+
+    <div class="cards cards-3">
+      <article class="card agent-card">
+        <div class="agent-head">
+          <div class="agent-icon" aria-hidden="true">ES</div>
+          <h3>Earth Science Data Search · CMR Agent</h3>
+        </div>
+        <p>Helps users discover NASA Earth science datasets through structured, evidence-based CMR search.</p>
+        <div class="io-row"><b>IN</b><span>natural-language science query</span></div>
+        <div class="io-row"><b>OUT</b><span>ranked CMR datasets · provenance</span></div>
+      </article>
+
+      <article class="card agent-card">
+        <div class="agent-head">
+          <div class="agent-icon" aria-hidden="true">PD</div>
+          <h3>Planetary Data Search · PDS Agent</h3>
+        </div>
+        <p>Discovers datasets and products across NASA's Planetary Data System.</p>
+        <div class="io-row"><b>IN</b><span>target body, instrument, time range</span></div>
+        <div class="io-row"><b>OUT</b><span>matched PDS products · context</span></div>
+        <a class="gh-link" href="https://github.com/NASA-IMPACT/akd-suite/tree/main/agents/pds" target="_blank" rel="noopener">akd-suite/agents/pds →</a>
+      </article>
+
+      <article class="card agent-card">
+        <div class="agent-head">
+          <div class="agent-icon" aria-hidden="true">CS</div>
+          <h3>Code Search Agent</h3>
+        </div>
+        <p>Discovers scientific code repositories aligned with a user's technical or scientific task.</p>
+        <div class="io-row"><b>IN</b><span>task description · constraints</span></div>
+        <div class="io-row"><b>OUT</b><span>candidate repos · rationale</span></div>
+        <a class="gh-link" href="https://github.com/NASA-IMPACT/akd-suite/tree/main/agents/code-search" target="_blank" rel="noopener">akd-suite/agents/code-search →</a>
+      </article>
+
+      <article class="card agent-card">
+        <div class="agent-head">
+          <div class="agent-icon" aria-hidden="true">AS</div>
+          <h3>Astro Data Search Agent</h3>
+        </div>
+        <p>Discovers astronomical datasets across NASA astrophysics archives.</p>
+        <div class="io-row"><b>IN</b><span>science target · wavelength · epoch</span></div>
+        <div class="io-row"><b>OUT</b><span>archive matches · references</span></div>
+        <a class="gh-link" href="https://github.com/NASA-IMPACT/akd-suite/tree/main/agents/astro-search" target="_blank" rel="noopener">akd-suite/agents/astro-search →</a>
+      </article>
+
+      <article class="card agent-card">
+        <div class="agent-head">
+          <div class="agent-icon" aria-hidden="true">GA</div>
+          <h3>Gap Analysis · Gap Search Agent</h3>
+        </div>
+        <p>Identifies defensible research gaps, contradictions, and candidate research questions from a user-curated corpus of papers.</p>
+        <div class="io-row"><b>IN</b><span>curated literature corpus</span></div>
+        <div class="io-row"><b>OUT</b><span>gap statements · supporting evidence</span></div>
+        <a class="gh-link" href="https://github.com/NASA-IMPACT/akd-suite/tree/main/agents/gap" target="_blank" rel="noopener">akd-suite/agents/gap →</a>
+      </article>
+
+      <article class="card agent-card">
+        <div class="agent-head">
+          <div class="agent-icon" aria-hidden="true">SI</div>
+          <h3>Scientific Illustrator Agent</h3>
+        </div>
+        <p>Transforms scientific text into structured, publication-grade visual prompts, diagrams, captions, and figure concepts.</p>
+        <div class="io-row"><b>IN</b><span>research narrative · figure intent</span></div>
+        <div class="io-row"><b>OUT</b><span>figure spec · caption · prompt</span></div>
+        <a class="gh-link" href="https://github.com/NASA-IMPACT/AKD-Scientific-Illustration-Agent/blob/main/Version2/Readme_v2.md" target="_blank" rel="noopener">AKD-Scientific-Illustration-Agent →</a>
+      </article>
+
+      <article class="card agent-card">
+        <div class="agent-head">
+          <div class="agent-icon" aria-hidden="true">PW</div>
+          <h3>Scientific Paper Writing Assistant</h3>
+        </div>
+        <p>Supports staged scientific manuscript drafting from structured research inputs, references, methods, datasets, and results.</p>
+        <div class="io-row"><b>IN</b><span>structured research inputs</span></div>
+        <div class="io-row"><b>OUT</b><span>section drafts · revision suggestions</span></div>
+      </article>
+
+      <article class="card agent-card">
+        <div class="agent-head">
+          <div class="agent-icon" aria-hidden="true">GV</div>
+          <h3>NASA Governance Agent</h3>
+        </div>
+        <p>Supports governance, policy interpretation, compliance reasoning, and checklist-style analysis.</p>
+        <div class="io-row"><b>IN</b><span>policy question · context</span></div>
+        <div class="io-row"><b>OUT</b><span>structured analysis · cited clauses</span></div>
+      </article>
+    </div>
+    <p style="margin-top:24px; font-size:13px; color:var(--text-muted); font-family:var(--font-mono); letter-spacing:0.04em;">
+      All agents operate as decision-support systems with explicit human-in-the-loop oversight.
+    </p>
+  </div>
+</section>
+
+<!-- ========== WORKFLOWS ========== -->
+<section class="section" id="workflows">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">07 · Multi-Agent Workflows</span>
+      <h2>Chains of agents, with humans at the gates.</h2>
+      <p>
+        AKD workflows chain agents together into end-to-end research pipelines, with
+        explicit human approval gates between stages. Workflows are composed in
+        AKD Flow and run with full visibility into intermediate artifacts.
+      </p>
+    </div>
+
+    <div class="workflow-card">
+      <span class="eyebrow" style="color:var(--accent-3);">Featured Workflow</span>
+      <h3 style="font-size:26px; margin-top:10px;">Closed-Loop CM1 Climate Modeling Workflow</h3>
+      <div class="badge-row">
+        <span class="badge live">● Live</span>
+        <span class="badge">Atmospheric Simulation</span>
+        <span class="badge">5-Stage Pipeline</span>
+        <span class="badge">Human-in-the-Loop</span>
+      </div>
+      <p style="max-width:760px;">
+        A five-stage atmospheric simulation research workflow that moves from
+        research question and gap analysis to feasibility mapping, workflow
+        specification, experiment implementation, and publication-style reporting.
+      </p>
+      <div class="cm1-stages">
+        <div><span>Stage 01</span>Research question & gap analysis</div>
+        <div><span>Stage 02</span>Feasibility mapping</div>
+        <div><span>Stage 03</span>Workflow specification</div>
+        <div><span>Stage 04</span>Experiment implementation</div>
+        <div><span>Stage 05</span>Publication-style reporting</div>
+      </div>
+      <div style="margin-top:24px;">
+        <a class="btn btn-primary" href="https://github.com/NASA-IMPACT/akd-suite/tree/main/agents/closed-loop-cm1" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" width="14" height="14"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.81.06 1.24.83 1.24.83.72 1.23 1.88.87 2.34.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.21 2.2.82a7.7 7.7 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          View Closed-Loop CM1
+        </a>
+      </div>
+    </div>
+
+    <div class="cards cards-2" style="margin-top:18px;">
+      <article class="card">
+        <div class="badge-row" style="margin:0 0 12px;">
+          <span class="badge wip">● Work in Progress</span>
+        </div>
+        <h3>FM Tuning Workflow</h3>
+        <p>A multi-agent workflow targeting structured foundation-model tuning for science applications. Currently in active development.</p>
+      </article>
+      <article class="card">
+        <div class="badge-row" style="margin:0 0 12px;">
+          <span class="badge wip">● Work in Progress</span>
+        </div>
+        <h3>Community Workflows</h3>
+        <p>Community-contributed pipelines composed from published agents. Submission, review, and publication standards are being defined.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ========== GUARDRAILS ========== -->
+<section class="section" id="guardrails">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">08 · Trust & Safety</span>
+      <h2>Science guardrails — input <em>and</em> output.</h2>
+      <p>
+        AKD guardrails are not only input filters. They also inspect generated
+        outputs before they are trusted or passed downstream — combining
+        general-purpose AI safety, science-specific risk taxonomies, and
+        defense-in-depth review patterns.
+      </p>
+    </div>
+
+    <div class="guard-grid">
+      <div class="guard-shell">
+        <h3 style="margin-bottom:6px;">What guardrails detect</h3>
+        <p style="margin-bottom:18px;">A non-exhaustive view of the failure modes guardrails actively check for in scientific agent outputs:</p>
+        <ul class="guard-list">
+          <li>Hallucination</li>
+          <li>Attribution gaps</li>
+          <li>Unsupported claims</li>
+          <li>Outdated confidence</li>
+          <li>Overgeneralization</li>
+          <li>Lack of grounding</li>
+          <li>Multidisciplinary reasoning failures</li>
+          <li>Consistency issues</li>
+        </ul>
+        <a class="btn btn-ghost" style="margin-top:22px;" href="https://github.com/NASA-IMPACT/akd/tree/main/guardrails" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" width="14" height="14"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.81.06 1.24.83 1.24.83.72 1.23 1.88.87 2.34.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.21 2.2.82a7.7 7.7 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          View guardrails on GitHub
+        </a>
+      </div>
+
+      <div class="guard-cards">
+        <div class="pill-card">
+          <h4>Granite Guardian</h4>
+          <p>Foundation-model-based safety checks integrated into the AKD guardrail layer.</p>
+        </div>
+        <div class="pill-card">
+          <h4>Risk Agent</h4>
+          <p>Reasoning component that classifies and explains risks in agent outputs.</p>
+        </div>
+        <div class="pill-card">
+          <h4>FactReasoner</h4>
+          <p>Targeted factuality reasoning over claims, attribution, and supporting evidence.</p>
+        </div>
+        <div class="pill-card">
+          <h4>NASA Science-Specific Risk Taxonomy</h4>
+          <p>Domain-aware risk categories tailored to scientific contexts and agent failure modes.</p>
+        </div>
+        <div class="pill-card">
+          <h4>Defense-in-Depth</h4>
+          <p>Layered checks across input, intermediate steps, and output — not a single gate.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PARTNERS ========== -->
+<section class="section" id="partners">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">09 · Partners & Collaborations</span>
+      <h2>Built across NASA and partner organizations.</h2>
+      <p>
+        AKD is a collaborative effort spanning NASA programs, research labs, and
+        engineering partners — connected through shared infrastructure and a
+        commitment to open, trustworthy science tools.
+      </p>
+    </div>
+
+    <div class="partner-grid">
+      <div class="partner"><b>NASA IMPACT AI</b><span>Program Lead</span></div>
+      <div class="partner"><b>IBM Research</b><span>Guardrails · AI Risk</span></div>
+      <div class="partner"><b>Development Seed</b><span>Engineering</span></div>
+      <div class="partner"><b>NASA Worldview</b><span>Earth Visualization</span></div>
+      <div class="partner"><b>Physical Science Informatics</b><span>PSI</span></div>
+      <div class="partner"><b>iESO / MIO</b><span>Open Science</span></div>
+      <div class="partner"><b>NASA Science Discovery Engine</b><span>SDE</span></div>
+      <div class="partner"><b>Open Community</b><span>Contributors</span></div>
+    </div>
+
+    <div class="partner-notes">
+      <p><strong style="color:var(--text);">IBM Research</strong> contributes to guardrails and AI Risk Atlas integration — bringing foundation-model safety patterns and science-aware risk taxonomies into the AKD trust layer.</p>
+      <p><strong style="color:var(--text);">Development Seed</strong> serves as an engineering partner for web products, deployment engineering, the planner, the visual workflow canvas, the streaming UI, and supporting services.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== TEAM ========== -->
+<section class="section" id="team">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">10 · Team</span>
+      <h2>The people behind AKD.</h2>
+      <p>
+        AKD is built by a multi-organization team of scientists, engineers, and
+        researchers. Replace any avatar by dropping a JPG into the path shown
+        in the source.
+      </p>
+    </div>
+
+    <!-- NASA ODSI AI Team for Science -->
+    <div class="team-group">
+      <div class="team-group-head">
+        <h3>NASA ODSI · AI Team for Science</h3>
+        <span>NASA IMPACT</span>
+      </div>
+      <div class="team-grid">
+        <div class="member lead">
+          <div class="avatar"><img src="assets/team/rahul-ramachandran.jpg" alt="Rahul Ramachandran" onerror="this.style.display='none'; this.parentNode.textContent='RR';">RR</div>
+          <span class="name">Rahul Ramachandran</span>
+          <span class="role">Lead</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/kumar-ramasubramanian.jpg" alt="Kumar Ramasubramanian" onerror="this.style.display='none'; this.parentNode.textContent='KR';">KR</div>
+          <span class="name">Kumar Ramasubramanian</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/nidhi-jha.jpg" alt="Nidhi Jha" onerror="this.style.display='none'; this.parentNode.textContent='NJ';">NJ</div>
+          <span class="name">Nidhi Jha</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/ajinkya-kulkarni.jpg" alt="Ajinkya Kulkarni" onerror="this.style.display='none'; this.parentNode.textContent='AK';">AK</div>
+          <span class="name">Ajinkya Kulkarni</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/nishan-pantha.jpg" alt="Nishan Pantha" onerror="this.style.display='none'; this.parentNode.textContent='NP';">NP</div>
+          <span class="name">Nishan Pantha</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/paridhi-parijuli.jpg" alt="Paridhi Parijuli" onerror="this.style.display='none'; this.parentNode.textContent='PP';">PP</div>
+          <span class="name">Paridhi Parijuli</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/sanjog-thapa.jpg" alt="Sanjog Thapa" onerror="this.style.display='none'; this.parentNode.textContent='ST';">ST</div>
+          <span class="name">Sanjog Thapa</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/rohit-sahoo.jpg" alt="Rohit Sahoo" onerror="this.style.display='none'; this.parentNode.textContent='RS';">RS</div>
+          <span class="name">Rohit Sahoo</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/luke-payne.jpg" alt="Luke Payne" onerror="this.style.display='none'; this.parentNode.textContent='LP';">LP</div>
+          <span class="name">Luke Payne</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/pushwitha-krishnappa.jpg" alt="Pushwitha Krishnappa" onerror="this.style.display='none'; this.parentNode.textContent='PK';">PK</div>
+          <span class="name">Pushwitha Krishnappa</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/rachel-slank.jpg" alt="Rachel Slank" onerror="this.style.display='none'; this.parentNode.textContent='RS';">RS</div>
+          <span class="name">Rachel Slank</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/ash-danehar.jpg" alt="Ash Danehar" onerror="this.style.display='none'; this.parentNode.textContent='AD';">AD</div>
+          <span class="name">Ash Danehar</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/sajil-awale.jpg" alt="Sajil Awale" onerror="this.style.display='none'; this.parentNode.textContent='SA';">SA</div>
+          <span class="name">Sajil Awale</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/simran-kc.jpg" alt="Simran KC" onerror="this.style.display='none'; this.parentNode.textContent='SK';">SK</div>
+          <span class="name">Simran KC</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/ray-french.jpg" alt="Ray French" onerror="this.style.display='none'; this.parentNode.textContent='RF';">RF</div>
+          <span class="name">Ray French</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/mckenzie.jpg" alt="McKenzie" onerror="this.style.display='none'; this.parentNode.textContent='Mc';">Mc</div>
+          <span class="name">McKenzie</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- IBM Research -->
+    <div class="team-group">
+      <div class="team-group-head">
+        <h3>IBM Research</h3>
+        <span>Guardrails · AI Risk</span>
+      </div>
+      <div class="team-grid">
+        <div class="member lead">
+          <div class="avatar"><img src="assets/team/juan-bernabe.jpg" alt="Juan Bernabe" onerror="this.style.display='none'; this.parentNode.textContent='JB';">JB</div>
+          <span class="name">Juan Bernabe</span>
+          <span class="role">Lead</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/geeth-del-mel.jpg" alt="Geeth Del Mel" onerror="this.style.display='none'; this.parentNode.textContent='GD';">GD</div>
+          <span class="name">Geeth Del Mel</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/alessandra-pascale.jpg" alt="Alessandra Pascale" onerror="this.style.display='none'; this.parentNode.textContent='AP';">AP</div>
+          <span class="name">Alessandra Pascale</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/bishwaranjan-bhattacharjee.jpg" alt="Bishwaranjan Bhattacharjee" onerror="this.style.display='none'; this.parentNode.textContent='BB';">BB</div>
+          <span class="name">Bishwaranjan Bhattacharjee</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/james-barry.jpg" alt="James Barry" onerror="this.style.display='none'; this.parentNode.textContent='JB';">JB</div>
+          <span class="name">James Barry</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/vishnudev-kuruvanthodi.jpg" alt="Vishnudev Kuruvanthodi" onerror="this.style.display='none'; this.parentNode.textContent='VK';">VK</div>
+          <span class="name">Vishnudev Kuruvanthodi</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/movina-moses.jpg" alt="Movina Moses" onerror="this.style.display='none'; this.parentNode.textContent='MM';">MM</div>
+          <span class="name">Movina Moses</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/tigran-tchkarian.jpg" alt="Tigran Tchkarian" onerror="this.style.display='none'; this.parentNode.textContent='TT';">TT</div>
+          <span class="name">Tigran Tchkarian</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/javier-carnerero-cano.jpg" alt="Javier Carnerero Cano" onerror="this.style.display='none'; this.parentNode.textContent='JC';">JC</div>
+          <span class="name">Javier Carnerero Cano</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/mohab-elkaref.jpg" alt="Mohab Elkaref" onerror="this.style.display='none'; this.parentNode.textContent='ME';">ME</div>
+          <span class="name">Mohab Elkaref</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Development Seed -->
+    <div class="team-group">
+      <div class="team-group-head">
+        <h3>Development Seed</h3>
+        <span>Engineering Partner</span>
+      </div>
+      <div class="team-grid">
+        <div class="member">
+          <div class="avatar"><img src="assets/team/leo-thomas.jpg" alt="Leo Thomas" onerror="this.style.display='none'; this.parentNode.textContent='LT';">LT</div>
+          <span class="name">Leo Thomas</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/gjore-milevski.jpg" alt="Gjore Milevski" onerror="this.style.display='none'; this.parentNode.textContent='GM';">GM</div>
+          <span class="name">Gjore Milevski</span>
+        </div>
+        <div class="member">
+          <div class="avatar"><img src="assets/team/lane-goodman.jpg" alt="Lane Goodman" onerror="this.style.display='none'; this.parentNode.textContent='LG';">LG</div>
+          <span class="name">Lane Goodman</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== GITHUB & DOCUMENTATION ========== -->
+<section class="section" id="github">
+  <div class="container">
+    <div class="gh-section">
+      <span class="eyebrow" style="justify-content:center;">11 · GitHub & Documentation</span>
+      <h2>Open. Auditable. Built in public.</h2>
+      <p>
+        Explore the AI Agents for Science repository, contribute agents, review
+        documentation, and help build open, trustworthy AI infrastructure for science.
+      </p>
+
+      <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-top:8px;">
+        <a class="btn btn-primary" href="https://github.com/NASA-IMPACT/AI-Agents-for-Science" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" width="14" height="14"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.81.06 1.24.83 1.24.83.72 1.23 1.88.87 2.34.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.21 2.2.82a7.7 7.7 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          Main Repository
+        </a>
+        <a class="btn btn-ghost" href="https://ntrs.nasa.gov/citations/20260000926" target="_blank" rel="noopener">📄 CARE Paper (NTRS)</a>
+      </div>
+
+      <div class="gh-grid">
+        <a class="gh-tile" href="https://github.com/NASA-IMPACT/AI-Agents-for-Science" target="_blank" rel="noopener">
+          <div class="glyph">★</div>
+          <div><b>AI Agents for Science</b><span>NASA-IMPACT/AI-Agents-for-Science</span></div>
+        </a>
+        <a class="gh-tile" href="https://github.com/NASA-IMPACT/AKD-CARE" target="_blank" rel="noopener">
+          <div class="glyph">◇</div>
+          <div><b>CARE</b><span>NASA-IMPACT/AKD-CARE</span></div>
+        </a>
+        <a class="gh-tile" href="https://github.com/NASA-IMPACT/akd-core" target="_blank" rel="noopener">
+          <div class="glyph">◆</div>
+          <div><b>AKD Core</b><span>NASA-IMPACT/akd-core</span></div>
+        </a>
+        <a class="gh-tile" href="https://github.com/NASA-IMPACT/akd-ext" target="_blank" rel="noopener">
+          <div class="glyph">◇</div>
+          <div><b>AKD Ext</b><span>NASA-IMPACT/akd-ext</span></div>
+        </a>
+        <a class="gh-tile" href="https://github.com/NASA-IMPACT/akd/tree/main/guardrails" target="_blank" rel="noopener">
+          <div class="glyph">⛨</div>
+          <div><b>Guardrails</b><span>NASA-IMPACT/akd · guardrails</span></div>
+        </a>
+        <a class="gh-tile" href="https://github.com/NASA-IMPACT/akd-labs" target="_blank" rel="noopener">
+          <div class="glyph">⚗</div>
+          <div><b>AKD Labs</b><span>NASA-IMPACT/akd-labs</span></div>
+        </a>
+        <a class="gh-tile" href="https://github.com/NASA-IMPACT/akd/tree/main/flow" target="_blank" rel="noopener">
+          <div class="glyph">⌘</div>
+          <div><b>AKD Flow</b><span>NASA-IMPACT/akd · flow</span></div>
+        </a>
+        <a class="gh-tile" href="https://github.com/NASA-IMPACT/akd-suite/tree/main/agents/closed-loop-cm1" target="_blank" rel="noopener">
+          <div class="glyph">◎</div>
+          <div><b>Closed-Loop CM1</b><span>akd-suite/agents/closed-loop-cm1</span></div>
+        </a>
+        <a class="gh-tile" href="https://ntrs.nasa.gov/citations/20260000926" target="_blank" rel="noopener">
+          <div class="glyph">📄</div>
+          <div><b>CARE Paper</b><span>ntrs.nasa.gov / 20260000926</span></div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer>
+  <div class="container">
+    <p>AI AGENTS FOR SCIENCE · ACCELERATED KNOWLEDGE DISCOVERY</p>
+    <p>NASA IMPACT · Open, trustworthy AI infrastructure for science</p>
+  </div>
+</footer>
+
+<script>
+  // Mobile nav toggle
+  const toggle = document.getElementById('navToggle');
+  const links = document.getElementById('navLinks');
+  if (toggle && links) {
+    toggle.addEventListener('click', () => {
+      const open = links.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+    links.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        if (links.classList.contains('open')) {
+          links.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+    });
+  }
+</script>
+
+</body>
+</html>
