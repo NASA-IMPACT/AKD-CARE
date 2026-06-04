@@ -99,7 +99,7 @@ The focus of this repository is **documentation and design artifacts**, not runt
 ## Changelog
 
 ### v2.0.0
-Restructured the repository to better reflect the internal complexity of Phases 2 and 3. Both phases are now subdivided into dedicated sub-directories, making artifact ownership clearer and enabling more granular review at each stage gate.
+Restructured the repository to better reflect the internal complexity of Phases 2-key_information_elicitation.
 
 ## Key Differences: CARE V1 vs CARE V2
 
