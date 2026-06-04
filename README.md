@@ -14,6 +14,10 @@ Building reliable LLM agents for domain-sensitive workflows requires more than i
 
 CARE is defined by a three-party workflow that balances scientific integrity with technical feasibility:
 
+<p align="center">
+  <img width="1024" height="559" src="https://github.com/NASA-IMPACT/akd-care/blob/ada34b52b420aaf6e2e95fa5b2496a9b62608966/3-Party.png?raw=true" />
+</p>
+  
 | Role | Responsibility |
 |---|---|
 | **Subject Matter Experts (SMEs)** | Provide domain authority, surface nuanced constraints, and validate scientific correctness |
