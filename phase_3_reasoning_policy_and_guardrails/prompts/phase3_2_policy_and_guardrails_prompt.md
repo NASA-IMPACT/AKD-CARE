@@ -70,6 +70,26 @@ Produce a structured document with the following sections:
     * Risk descriptions and concerns
     * Enforcement actions when detected
 
+* Custom Risk Definitions (SME-Validated)
+
+  Record any SME-approved custom risks that are not part of the canonical taxonomy.
+
+  For each custom risk include:
+
+  - id
+  - description
+  - concern
+  - rationale for why an existing taxonomy risk was insufficient
+
+  Clearly distinguish:
+
+  - Taxonomy Risks
+  - Custom Risks
+
+  If no custom risks are approved, explicitly state:
+
+  "No custom risks were defined."
+
 * Guardrail Enforcement Matrix
 
 
@@ -136,6 +156,21 @@ Produce a structured document with the following sections:
   Only SME-approved signals should appear in the final matrix.
 
 
+* Custom Risk YAML Artifact
+
+  If SME-approved custom risks exist, generate an additional YAML representation containing only those custom risks.
+
+  The YAML should follow the same structure used by the canonical risk taxonomy:
+
+  ```
+  <risk_id>:
+    description: ...
+    concern: ...
+  ```
+
+  If no custom risks exist, output:
+
+  "No custom risk YAML generated."
 
 
 Use clear headings, bullet points, and traceability to prior stages.
@@ -191,13 +226,26 @@ Use clear headings, bullet points, and traceability to prior stages.
       - Ask SMEs which Granite Guardian harm categories should be enabled or disabled for input safety screening.
       - Identify candidate risk IDs from the taxonomy described in `guardrails_risk_taxonomy_reference.md`.
       - Ask SMEs which of these taxonomy risks should be actively monitored in generated responses.
+      - Ask SMEs whether there are domain-specific risks that are not adequately represented by the existing taxonomy.
+      - If such risks exist, elicit:
+        - a proposed risk identifier
+        - a description of the risk
+        - the concern associated with the risk
+      - Confirm whether each proposed custom risk should be monitored by RiskAgent.
       - Confirm enforcement behavior for each selected signal.
 
       Important constraints:
 
-      - Do not invent new risk IDs.
-      - Only risk IDs present in the taxonomy artifact may be considered.
-      - Only risks explicitly approved by SMEs should appear in the final Guardrail Enforcement Matrix.
+      - Existing taxonomy risks should be preferred whenever they adequately capture the concern.
+      - If SMEs identify a domain-specific risk that is not represented in the taxonomy, the interviewer may record it as a Proposed Custom Risk.
+      - Proposed Custom Risks must include:
+        - id
+        - description
+        - concern
+      - Proposed Custom Risks must be explicitly reviewed and approved by SMEs before inclusion.
+      - Custom risks must be clearly distinguished from taxonomy risks in the final artifact.
+      - Only SME-approved taxonomy risks and SME-approved custom risks should appear in the final Guardrail Enforcement Matrix.
+
 
       Probe specifically for:
 
